@@ -23,6 +23,7 @@ devel_isolated/
 /cfg/cpp/
 /cfg/*.py
 
+steps_turtle.txt
 # Ignore generated docs
 *.dox
 *.wikidoc
