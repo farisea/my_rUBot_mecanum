@@ -21,9 +21,8 @@ This image can be used for:
         - `ROS_DOMAIN_ID=1` variable to match your Group number.
         - `ROS_AUTOMATIC_DISCOVERY_RANGE` SUBNET (SIM use) or OFF (LAB use).
         - `ROS_STATIC_PEERS` not set (SIM use) or set with your robot IP (LAB Use).
-    - `cyclonedds_pc.xml` file: 
-        - `NetworkInterface`: not specified or PC-IP
-        - `AllowMulticast` true (SIM use) or false (LAB Use).
+        - Be sure to include: CYCLONEDDS_URI=file:///config/cyclonedds_pc.xml
+
 - Open a terminal in `~/my_rUBot_mecanum/network_config/humble` and run:
     ````bash
     xhost +local:root            # only in case of Host Ubuntu to allow X11 for Docker 
@@ -35,18 +34,14 @@ This image can be used for:
     docker exec -it pc_humble bash
     code .  # to open VSCode inside the container
     ```
-- Clone your ws in home
+- Clone your ws in `/root/`
 - Verify in container **.bashrc** to have:
     ```bash
     source /opt/ros/humble/setup.bash
-    source ~/my_rUBot_mecanum/install/setup.bash
+    source /root//my_rUBot_mecanum/install/setup.bash
     export QT_QPA_PLATFORM=xcb  # good default for RViz2 on many systems
-    cd ~/my_rUBot_mecanum
+    cd /root/my_rUBot_mecanum
     ```
-- If your `cyclonedds_pc.xml` has not correct network interfaces errors will arrise
-    - unset CYCLONEDDS_URI: to continue for simulation
-    - correct the interfaces with the proper values
-
 You are ready to work inside the container and to connect to the robot hardware within ROS2 Humble on Docker!
 
 - To stop the container, open a new terminal on Host in `~/my_rUBot_mecanum/network_config/humble` and run:
@@ -58,7 +53,7 @@ You are ready to work inside the container and to connect to the robot hardware 
     docker ps -a               # containers
     docker images              # images
     ```
-- To modify the `Dockerfile`, build and push to DockerHub, you can follow the instructions:
+- To modify the `Dockerfile`, build and push to Docker Hub, you can follow the instructions:
     ```bash
     docker build -t manelpuig/ros2-humble-ub-biorob:latest .
     docker login

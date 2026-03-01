@@ -171,7 +171,7 @@ We will:
         export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
         export ROS_AUTOMATIC_DISCOVERY_RANGE=OFF
         export ROS_STATIC_PEERS=192.168.1.15,192.168.1.16  # PC IP at FacFIS,FacINFORMATICS
-        #export CYCLONEDDS_URI=file:///home/ubuntu/my_rUBot_mecanum/network_config/humble/cyclonedds_robot.xml
+        export CYCLONEDDS_URI=file:///home/ubuntu/my_rUBot_mecanum/network_config/humble/cyclonedds_robot.xml
         ````
         > write the proper workspace path, in robot case `/home/ubuntu/my_rUBot_mecanum`
 

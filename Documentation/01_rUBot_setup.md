@@ -92,16 +92,20 @@ The setup process is based on a custom Ubuntu22.04 with the ROS2 Humble environm
 A speciffic installation is made for the UB custom rUBot model prototypes.
 
 
-**rUBot mecanum** custom made robot contains a raspberrypi4 with custom ROS2 configuration in Ubuntu22.04 server 64bits. When you power-on the rUBot:
+**rUBot mecanum** custom made robot contains a raspberrypi4 with custom ROS2 configuration in Ubuntu22.04 server 64bits. 
+
+When you power-on the rUBot:
 - it connects to the wifi `local network: Robotics_UB` with a specific IP address (192.168.1.x4)
 - launch the bringup and control nodes automatically
 - launch Rosbridge and web servers to properly control the robot from a mobile phone/remote computer
 
-Robot control will be made from student's **PC-computer** (Linux/ubuntu) connected to the same wifi network `Robotics_UB`. Each computer will have a specific IP address assigned:
-- In Physics Faculty Lab: 192.168.1.x5 (x=1,2,3,4 corresponding to group number)
-- In Mathematics and Informatics Faculty Lab: 192.168.1.x6 (x=1,2,3,4 corresponding to group number)
+Robot control will be made from student's **PC-computer** (Linux/ubuntu) connected to the same wifi network `Robotics_UB`. 
 
 **PC-Ubuntu22:** will make the rUBot control across the local network. 
+
+Each computer will have a specific IP address assigned:
+- In Physics Faculty Lab: 192.168.1.x5 (x=1,2,3,4 corresponding to group number)
+- In Mathematics and Informatics Faculty Lab: 192.168.1.x6 (x=1,2,3,4 corresponding to group number)
 
 If you have not Ubuntu22.04, you will have to work on a [ROS2 environment on UB custom Docker container](https://github.com/manelpuig/my_rUBot_mecanum/blob/humble/network_config/humble/Network_config_humble.md) - section 4. 
 
@@ -128,7 +132,6 @@ If you have Ubuntu22.04, follow instructions:
     # --- ROS 2 networking ---
     export ROS_DOMAIN_ID=1 # Group number 1
     export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-    export ROS_LOCALHOST_ONLY=0
     # robust hotspot mode
     export ROS_AUTOMATIC_DISCOVERY_RANGE=OFF 
     export ROS_STATIC_PEERS=192.168.1.14  # robot IP (14,24,34 or 44)
