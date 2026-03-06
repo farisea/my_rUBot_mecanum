@@ -34,7 +34,8 @@ steps_turtle.txt
 
 # qcreator stuff
 CMakeLists.txt.user
-
+world/
+src/my_robot_bringup/world/
 srv/_*.py
 *.pcd
 *.pyc
