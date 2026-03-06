@@ -31,12 +31,25 @@ class RobotSelfControl(Node):
         self._cmdVel = self.create_publisher(Twist, '/cmd_vel', 10)
         self.timer = self.create_timer(0.1, self.timer_callback)
 
-        self.subscription = self.create_subscription(
-            LaserScan,
-            '/scan',
-            self.laser_callback,
-            10  # Default QoS depth
+        #self.subscription = self.create_subscription(
+        #    LaserScan,
+        #    '/scan',
+        #    self.laser_callback,
+        #    10  # Default QoS depth
+        #)
+        scan_qos = QoSProfile(
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=5,
+            durability=QoSDurabilityPolicy.VOLATILE
         )
+        self.scan_sub = self.create_subscription(
+            LaserScan,
+            "/scan",
+            self.laser_callback,
+            scan_qos,
+        )
+
         self.start_time = self.get_clock().now().nanoseconds * 1e-9
         self._shutting_down = False
         self._last_info_time = self.start_time
@@ -54,9 +67,9 @@ class RobotSelfControl(Node):
         self._cmdVel.publish(self._msg)
 
         if now_sec - self._last_speed_time >= 1:
-            self.get_logger().info(f"[DETECTION] Distance: {self._last_closest_distance:.2f} m | Angle: {self._last_closest_angle:.0f}°")
-            self.get_logger().info(f"Ángulo actual de movimiento: {self._current_angle_deg:.0f}°")
-            self.get_logger().info(f"Vx: {self._msg.linear.x:.2f} m/s, w: {self._msg.angular.z:.2f} rad/s | Time: {elapsed_time:.1f}s")
+            #self.get_logger().info(f"[DETECTION] Distance: {self._last_closest_distance:.2f} m | Angle: {self._last_closest_angle:.0f}°")
+            #self.get_logger().info(f"Ángulo actual de movimiento: {self._current_angle_deg:.0f}°")
+            #self.get_logger().info(f"Vx: {self._msg.linear.x:.2f} m/s, w: {self._msg.angular.z:.2f} rad/s | Time: {elapsed_time:.1f}s")
             self._last_speed_time = now_sec
         if elapsed_time >= self._time_to_stop:
             self.timer.cancel()
@@ -100,15 +113,13 @@ class RobotSelfControl(Node):
             angle_robot_deg =angle_min_deg + i * angle_increment_deg
             #if angle_robot_deg > 180.0:  # (no necesario si el LIDAR ya da ángulos en [-180, 180])
             #    angle_robot_deg -= 360.0
-            if not math.isfinite(distance) or distance <= 0.0:
-                continue
+
             if distance < scan.range_min or distance > scan.range_max:
                 continue
             #if -150 < angle_robot_deg < 150:
-            if -180 < angle_robot_deg < 180 and distance < closest_distance:  # (aceptando todo el FOV del LIDAR)
+            #-180 < angle_robot_deg < 180 and
+            if  distance < closest_distance:  # (aceptando todo el FOV del LIDAR)
                 closest_distance, angle_closest_distance = distance, angle_robot_deg
-            else:
-                continue
 
         if closest_distance is math.inf:
             return
