@@ -71,6 +71,7 @@ class RobotSelfControl(Node):
         angle_min_deg = scan.angle_min * 180.0 / 3.14159
         angle_increment_deg = scan.angle_increment * 180.0 / 3.14159
 
+        """
         # Filter valid readings within [-150°, 150°]
         custom_range = []  # (cambiar a un mínimo en vez de lista completa para eficiencia)
         for i, distance in enumerate(scan.ranges):
@@ -91,7 +92,27 @@ class RobotSelfControl(Node):
         if not custom_range:
             return
         closest_distance, angle_closest_distance = min(custom_range)
+        """
 
+        closest_distance = math.inf
+        for i, distance in enumerate(scan.ranges):
+            # Angle on robot
+            angle_robot_deg =angle_min_deg + i * angle_increment_deg
+            #if angle_robot_deg > 180.0:  # (no necesario si el LIDAR ya da ángulos en [-180, 180])
+            #    angle_robot_deg -= 360.0
+            if not math.isfinite(distance) or distance <= 0.0:
+                continue
+            if distance < scan.range_min or distance > scan.range_max:
+                continue
+            #if -150 < angle_robot_deg < 150:
+            if -180 < angle_robot_deg < 180 and distance < closest_distance:  # (aceptando todo el FOV del LIDAR)
+                closest_distance, angle_closest_distance = distance, angle_robot_deg
+            else:
+                continue
+
+        if closest_distance is math.inf:
+            return
+        
         # Determine zone
         # (esto es innecesario, usa directamente el ángulo para decidir la reacción)
         """
