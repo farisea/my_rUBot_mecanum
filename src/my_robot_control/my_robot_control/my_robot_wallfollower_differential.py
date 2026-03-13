@@ -4,7 +4,6 @@ from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
-from rclpy.qos import QoSProfile,QoSReliabilityPolicy,QoSHistoryPolicy,QoSDurabilityPolicy
 
 
 class WallFollower(Node):
@@ -28,17 +27,8 @@ class WallFollower(Node):
         self.cmd = Twist()
 
         # ROS 2 entities
-        scan_qos = QoSProfile(
-            reliability=QoSReliabilityPolicy.BEST_EFFORT,
-            history=QoSHistoryPolicy.KEEP_LAST,
-            depth=5,
-            durability=QoSDurabilityPolicy.VOLATILE
-        )
-        self.scan_sub = self.create_subscription(
-            LaserScan,
-            "/scan",
-            self.laser_callback,
-            scan_qos,
+        self.subscription = self.create_subscription(
+            LaserScan, '/scan', self.laser_callback, qos_profile_sensor_data
         )
         self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
 
@@ -99,7 +89,6 @@ class WallFollower(Node):
 
         try:
             self.publisher.publish(self.cmd)
-
         except Exception:
             # If the context or publisher is invalid, ignore
             pass
@@ -113,75 +102,121 @@ class WallFollower(Node):
         angle_min = math.degrees(scan.angle_min)
         angle_inc = math.degrees(scan.angle_increment)
 
-        closest_distance = math.inf
-        for i, distance in enumerate(scan.ranges):
-            # Angle on robot
-            angle_robot_deg =angle_min + i * angle_inc
+        min_front = math.inf
+        min_fr_right = math.inf
+        min_right = math.inf
+        min_back_right = math.inf
 
-            if distance < scan.range_min or distance > scan.range_max:
+        for i, d in enumerate(scan.ranges):
+            if d < scan.range_min or d > scan.range_max:
                 continue
 
-            # Filter valid readings within [-180°, 0°]
-            if 0 < angle_robot_deg < 180.0:
-                continue
+            ang = angle_min + i * angle_inc
 
-            # Replace closest distance if this one is smaller
-            if  distance < closest_distance:
-                closest_distance, angle_closest_distance = distance, angle_robot_deg
+            if -20 <= ang <= 20:
+                if d < min_front:
+                    min_front = d
+            elif -70 <= ang < -20:
+                if d < min_fr_right:
+                    min_fr_right = d
+            elif -110 <= ang < -70:
+                if d < min_right:
+                    min_right = d
+            elif -160 <= ang < -110:
+                if d < min_back_right:
+                    min_back_right = d
 
-        if closest_distance is math.inf:
-            return
-
-        # Guardar el último ángulo y distancia para mostrar en el timer_callback junto con la velocidad actual
-        self._last_closest_distance = closest_distance
-        self._last_closest_angle = angle_closest_distance
-
-        twist = Twist()
+        #We re-use the last twist, better than creating a new one every single iteration
+        twist = self.cmd
         action = ""
 
-        # No nos movemos en Y
-        twist.linear.y = 0.0
-        twist.linear.x = self.v_lin * 0.5  # default forward speed (can be reduced by rules below)
-        twist.angular.z = 0.0  # default rotation (can be set by rules below)
+        #----------------------------------------------------------
+        # RULE 1: FRONT obstacle → turn left
+        #----------------------------------------------------------
+        if min_front < self.base_distance:
+            twist.linear.x = 0.0
+            twist.linear.y = 0.0
+            twist.angular.z = self.v_ang * 2.0
+            action = f"FRONT {min_front:.2f} m → turn LEFT"
 
-        # Comprobamos que sea menor a la distancia límite para reaccionar (si no, dejamos cmd a cero → robot se detiene)
-        if closest_distance < self.base_distance:
+        #----------------------------------------------------------
+        # RULE 2: FRONT-RIGHT obstacle → slow + left
+        #----------------------------------------------------------
+        elif min_fr_right < self.base_distance:
+            twist.linear.x = 0.0
+            twist.linear.y = 0.0
+            twist.angular.z = self.v_ang * 2.0
+            action = f"FRONT-RIGHT {min_fr_right:.2f} m → turn LEFT"
 
-            # Diferencia de ángulo respecto a -90° (pared a la derecha) y ratio de distancia respecto a la distancia límite
-            angle_error = angle_closest_distance + 90
-            distance_ratio = max(0.0, min(closest_distance / self.base_distance, 1.0))
-            
-            #----------------------------------------------------------
-            # RULE 1: speed proportional to angle and distance of closest obstacle
-            #----------------------------------------------------------
-            # Velocidad en X proporcional al error de ángulo y a la distancia al obstáculo
-            # (más cerca → más lento, más lejos dentro del límite → más rápido)
-            twist.linear.x = self.v_lin * (1 - abs(angle_error) / 90) * distance_ratio
+        #----------------------------------------------------------
+        # RULE 3: RIGHT visible → control with tolerance band (no vy)
+        #----------------------------------------------------------
+        elif math.isfinite(min_right):
+            # error > 0 → too far; error < 0 → too close
+            error = min_right - self.base_distance
 
-            #----------------------------------------------------------
-            # RULE 2: turn proportional to angle and distance of closest obstacle
-            #----------------------------------------------------------
+            if -self.tol <= error <= self.tol:
+                # Inside band: go straight
+                twist.linear.x = self.v_lin
+                twist.linear.y = 0.0
+                twist.angular.z = 0.0
+                action = (
+                    f"RIGHT ~OK ({min_right:.2f} m, target "
+                    f"{self.base_distance:.2f}±{self.tol:.2f}) → STRAIGHT"
+                )
 
-            # Velocidad de giro proporcional al error de ángulo y a la cercanía del obstáculo
-            # (más cerca → más giro)
-            twist.angular.z = self.v_ang * (angle_error / 10) * (2.0 - distance_ratio)
+            elif error < 0:
+                # Too close to right wall → slow forward + stronger left turn
+                twist.linear.x = self.v_lin * 0.5
+                twist.linear.y = 0.0
+                twist.angular.z = self.v_ang * 2.0
+                action = (
+                    f"RIGHT too CLOSE ({min_right:.2f} m < "
+                    f"{self.base_distance:.2f}-{self.tol:.2f}) → "
+                    f"forward + strong LEFT turn"
+                )
 
+            else:
+                # Too far from right wall → slow forward + stronger right turn
+                twist.linear.x = self.v_lin * 0.5
+                twist.linear.y = 0.0
+                twist.angular.z = -self.v_ang * 2.0
+                action = (
+                    f"RIGHT too FAR ({min_right:.2f} m > "
+                    f"{self.base_distance:.2f}+{self.tol:.2f}) → "
+                    f"forward + strong RIGHT turn"
+                )
+
+        #----------------------------------------------------------
+        # RULE 4: BACK-RIGHT → only if it is the most relevant wall
+        #----------------------------------------------------------
+        elif math.isfinite(min_back_right) and (
+            not math.isfinite(min_right) or min_back_right <= min_right
+        ):
+            twist.linear.x = self.v_lin * 0.1
+            twist.linear.y = 0.0
+            twist.angular.z = -2.0 * self.v_ang
+            action = (
+                f"BACK-RIGHT {min_back_right:.2f} m → "
+                f"very slow + STRONG RIGHT turn (2*w)"
+            )
+
+        # if nothing is visible, twist remains zero -> robot stops
 
         # Update last commanded twist (periodic timer will publish it)
         self.cmd = twist
 
-        # Update state for logging
-        self._state_action = f"Movement: {twist.linear.x:.2f} m/s, {twist.angular.z:.2f} rad/s"
+        # Logging (only on change)
+        if action != self._last_action_logged:
+            self.get_logger().info(action if action else "No action (stopped).")
+            self._last_action_logged = action
+
+        self._state_action = action if action else "Stopped (no wall detected)"
 
     #--------------------------------------------------------------------
     def log_info(self):
         if not self._shutting_down:
-            # Log the last distance and angle to the closest obstacle and the current action
-            self.get_logger().info(
-                f"[DETECTION] Distance: {self._last_closest_distance:.2f} m | "
-                f"Angle: {self._last_closest_angle:.0f}° | "
-                f"State: {self._state_action}"
-            )
+            self.get_logger().info(self._state_action)
 
 def main(args=None):
     rclpy.init(args=args)
