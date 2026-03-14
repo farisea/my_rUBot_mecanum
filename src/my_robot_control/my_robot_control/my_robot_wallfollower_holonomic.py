@@ -4,6 +4,7 @@ from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
+from rclpy.qos import QoSProfile,QoSReliabilityPolicy,QoSHistoryPolicy,QoSDurabilityPolicy
 
 
 class WallFollower(Node):
@@ -27,8 +28,18 @@ class WallFollower(Node):
         self.cmd = Twist()
 
         # ROS 2 entities
-        self.subscription = self.create_subscription(
-            LaserScan, '/scan', self.laser_callback, qos_profile_sensor_data
+        # Best-effort scanning
+        scan_qos = QoSProfile(
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=5,
+            durability=QoSDurabilityPolicy.VOLATILE
+        )
+        self.scan_sub = self.create_subscription(
+            LaserScan,
+            "/scan",
+            self.laser_callback,
+            scan_qos,
         )
         self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
 
