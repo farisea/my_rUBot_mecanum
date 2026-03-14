@@ -115,12 +115,12 @@ class WallFollower(Node):
         # Usamos 6 zonas en lugar de las típicas 3 porque el movimiento holonómico
         # nos permite reaccionar de forma diferente según de dónde venga el obstáculo,
         # sin necesidad de girar el robot entero.
-        FRONT      = []
-        LEFT       = []   # detecta si hay pared a la izquierda 
-        FR_RIGHT   = []   # frente-derecha: junto con BACK_RIGHT permite calcular el ángulo con la pared
-        RIGHT      = []
-        BACK_RIGHT = []   # atrás-derecha: junto con FR_RIGHT permite calcular el ángulo con la pared
-        BACK       = []   # solo se usa si ninguna otra zona tiene obstáculo cercano
+        min_front       = math.inf
+        min_left        = math.inf   # detecta si hay pared a la izquierda 
+        min_fr_right    = math.inf   # frente-derecha: junto con BACK_RIGHT permite calcular el ángulo con la pared
+        min_right       = math.inf
+        min_back_right  = math.inf   # atrás-derecha: junto con FR_RIGHT permite calcular el ángulo con la pared
+        min_back        = math.inf   # solo se usa si ninguna otra zona tiene obstáculo cercano
 
         for i, d in enumerate(scan.ranges):
             if not math.isfinite(d):
@@ -130,19 +130,29 @@ class WallFollower(Node):
 
             ang = angle_min + i * angle_inc
 
-            if   -20  <= ang <=  20:          FRONT.append(d)
-            elif  20  <  ang <= 110:          LEFT.append(d)
-            elif -70  <= ang <  -20:          FR_RIGHT.append(d)
-            elif -110 <= ang <  -70:          RIGHT.append(d)
-            elif -160 <= ang < -110:          BACK_RIGHT.append(d)
-            elif ang < -160 or ang > 160:     BACK.append(d)
+            if   -20  <= ang <=  20:
+                if d < min_front:
+                    min_front = d
 
-        min_front      = min(FRONT)      if FRONT      else float('inf')
-        min_fr_right   = min(FR_RIGHT)   if FR_RIGHT   else float('inf')
-        min_right      = min(RIGHT)      if RIGHT      else float('inf')
-        min_back_right = min(BACK_RIGHT) if BACK_RIGHT else float('inf')
-        min_back       = min(BACK)       if BACK       else float('inf')
-        min_left       = min(LEFT)       if LEFT       else float('inf')
+            elif  20  <  ang <= 110:
+                if d < min_left:
+                    min_left = d
+
+            elif -70  <= ang <  -20:
+                if d < min_fr_right:
+                    min_fr_right = d
+
+            elif -110 <= ang <  -70:
+                if d < min_right:
+                    min_right = d
+
+            elif -160 <= ang < -110:
+                if d < min_back_right:
+                    min_back_right = d
+
+            elif ang < -160 or ang > 160:
+                if d < min_back:
+                    min_back = d
 
         twist  = Twist()
         action = ""
