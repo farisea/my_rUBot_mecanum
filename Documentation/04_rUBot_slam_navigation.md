@@ -100,19 +100,22 @@ These 3 packages are organized inside a `Navigation_Projects` subfolder on src f
         ````bash
         ros2 launch my_robot_navigation2 navigation2_robot.launch.py  use_sim_time:=true map_file:=map_square4m_sign.yaml params_file:=rubot_sw.yaml 
         ````
-        >For LIMO: We use "limo_sw.yaml" file. In case we want to priorize the lidar data from odometry data we will use Limo_sw_lidar.yaml
+        >An optimized set of Navigation parameters is set on rubot_sw_lidar.yaml:
+        >    - Initial Pose is set
+        >    - lidar data is priorized from odometry for robot localization
+        >    - Cost map Resolution and computational cost is minimized
     - In the case of real robot:
         ````shell
         ros2 launch my_robot_navigation2 navigation2_robot.launch.py use_sim_time:=false map_file:=my_map.yaml params_file:=rubot_real.yaml
         ````
-        > If you do not see the MAP in rviz2, close the terminal execution (crtl+C) and start again until you see the Map.
 
-        > An error appears in "Global status" due to the unlocalization of your robot in the map. When you localize your robot in the map this error desappears.
-- Localize the robot on the map using "2D-Pose estimate". The "Global Planner" and "Controller" will be updated and NO errors will appear
+- If Initial Pose is not set, localize the robot on the map using "2D-Pose estimate". The "Global Planner" and "Controller" will be updated and NO errors will appear
 - Navigate on the MAP with Nav2
     - Selecty 1 target point
-    - Select multiple waypoints with "Waypoint/Nav through Poses Mode" option
-    - Select a unique trajectory following the different Waypoints with the "Start Nav Through Poses" option
+    - Select multiple waypoints with "Waypoint/Nav through Poses Mode" option:
+        - Select different `Nav2 Goal` points in RVIZ2
+        - Choose `Start Waypoint Following` option to follow the exact `Nav2 Goal` selected points
+        - Choose `Start Nav Through Poses` option to follow an optimized unique trajectory following the different `Nav2 Goal` selected points 
 
 ## **4.4. Interact Programmatically with Nav2**
 
