@@ -12,7 +12,7 @@ class WallFollower(Node):
         super().__init__('wall_follower_node')
 
         # Parameters
-        self.declare_parameter('distance_limit', 0.5)    # desired distance to right wall
+        self.declare_parameter('distance_limit', 0.35)    # desired distance to right wall
         self.declare_parameter('forward_speed', 0.20)    # linear speed
         self.declare_parameter('turn_speed', 0.40)       # angular speed
         self.declare_parameter('time_to_stop', 30.0)     # auto-stop
@@ -179,7 +179,7 @@ class WallFollower(Node):
             elif error < 0:
                 # Too close to right wall → slow forward + stronger left turn
                 twist.linear.x = self.v_lin * 0.5
-                twist.linear.y = 0.0
+                twist.linear.y = self.v_lin * 0.5
                 twist.angular.z = self.v_ang * 2.0
                 action = (
                     f"RIGHT too CLOSE ({min_right:.2f} m < "
@@ -190,7 +190,7 @@ class WallFollower(Node):
             else:
                 # Too far from right wall → slow forward + stronger right turn
                 twist.linear.x = self.v_lin * 0.5
-                twist.linear.y = 0.0
+                twist.linear.y = -self.v_lin * 0.5
                 twist.angular.z = -self.v_ang * 2.0
                 action = (
                     f"RIGHT too FAR ({min_right:.2f} m > "
