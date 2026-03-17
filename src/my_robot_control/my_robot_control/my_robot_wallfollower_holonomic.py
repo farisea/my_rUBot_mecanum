@@ -103,6 +103,10 @@ class WallFollower(Node):
         return max(low, min(high, value))
 
     #--------------------------------------------------------------------
+    def _saturate(self, value, endpoint):
+        return self._clamp(value, -endpoint, endpoint)
+
+    #--------------------------------------------------------------------
     def laser_callback(self, scan):
         """Compute control action from LIDAR and update self.cmd."""
         if self._shutting_down:
@@ -121,6 +125,13 @@ class WallFollower(Node):
         min_right       = math.inf
         min_back_right  = math.inf   # atrás-derecha: junto con FR_RIGHT permite calcular el ángulo con la pared
         min_back        = math.inf   # solo se usa si ninguna otra zona tiene obstáculo cercano
+        
+        
+        # Ángulos mínimos para las zonas principales
+        min_front_angle = math.inf
+        min_right_angle = math.inf
+        min_back_angle  = math.inf
+        min_left_angle  = math.inf
 
         for i, d in enumerate(scan.ranges):
             if not math.isfinite(d):
@@ -130,29 +141,33 @@ class WallFollower(Node):
 
             ang = angle_min + i * angle_inc
 
-            if   -20  <= ang <=  20:
+            if   -40  <= ang <=  40:
                 if d < min_front:
                     min_front = d
+                    min_front_angle = ang
 
-            elif  20  <  ang <= 110:
+            elif  40  <  ang <= 140:
                 if d < min_left:
                     min_left = d
+                    min_left_angle = ang
 
-            elif -70  <= ang <  -20:
+            elif -50  <= ang <  -40:
                 if d < min_fr_right:
                     min_fr_right = d
 
-            elif -110 <= ang <  -70:
+            elif -130 <= ang <  -50:
                 if d < min_right:
                     min_right = d
+                    min_right_angle = ang
 
-            elif -160 <= ang < -110:
+            elif -140 <= ang < -130:
                 if d < min_back_right:
                     min_back_right = d
 
-            elif ang < -160 or ang > 160:
+            elif ang < -140 or ang > 140:
                 if d < min_back:
                     min_back = d
+                    min_back_angle = ang
 
         twist  = Twist()
         action = ""
@@ -177,67 +192,69 @@ class WallFollower(Node):
         )
 
         # PRIORIDAD 1: obstáculo cercano → evasión holonómica reactiva
-        # La idea clave es usar vy como primera respuesta,
-        # sin necesidad de frenar y girar como haría un robot diferencial.
-        # wz solo se usa para alineación, no para evadir.
         if math.isfinite(closest_distance) and closest_distance < reaction_limit:
 
+            # Para cada zona, la reacción se adapta a la dirección del obstáculo:
             if closest_zone == 'FRONT':
+                """
                 if math.isfinite(min_left) and min_left < self.base_distance * 0.9:
                     # Esquina interior (bloqueado por delante y por la izquierda):
                     # no hay espacio para strafear → retrocedemos un poco y rotamos
                     # en sentido antihorario para sacar el frente de la esquina.
-                    twist.linear.x  = -self.v_lin * 0.3
+                    twist.linear.x  =  0.0
                     twist.linear.y  =  0.0
                     twist.angular.z =  self.v_ang
                     action = (f"FRONT+LEFT corner ({closest_distance:.2f} m, "
-                              f"left={min_left:.2f} m) -> recul + GIRAR")
+                              f"left={min_left:.2f} m) -> GIRAR")
                 else:
-                    # Obstáculo solo por delante, izquierda libre:
-                    # strafe lateral izquierdo puro + pequeño retroceso para ganar margen.
-                    # No giramos → el robot mantiene su orientación y esquiva más rápido.
+                    """
+                # Obstáculo solo por delante, izquierda libre:
+                # Si está muy cerca, damos más prioridad al retroceso para evitar chocar
+                if closest_distance < self.base_distance * 0.5:
                     twist.linear.x  = -self.v_lin * 0.3
-                    twist.linear.y  =  self.v_lin
+                    twist.linear.y  =  0.0
                     twist.angular.z =  0.0
-                    action = f"FRONT {closest_distance:.2f} m -> recul + move LEFT"
+                # Si está a una distancia moderada, movemos hacia la izquierda y corregimos el ángulo hasta 0
+                else:
+                    angular_correction_ratio = min_front_angle * 0.2 # Proporcional a lo cerca que esté del umbral frontal
+                    twist.linear.x  =  0.0
+                    twist.linear.y  =  self.v_lin
+                    twist.angular.z =  self._saturate(angular_correction_ratio * self.v_ang, self.v_ang)
+                action = f"FRONT {closest_distance:.2f} m -> move LEFT + rotate to 0°"
 
             elif closest_zone == 'FRONT_RIGHT':
                 # Obstáculo en diagonal delantera-derecha:
-                # movimiento oblicuo hacia delante-izquierda (más lateral que retroceso)
-                # para alejarse de la esquina sin perder demasiado avance.
-                twist.linear.x  = -self.v_lin * 0.2
-                twist.linear.y  =  self.v_lin * 0.8
+                # movimiento oblicuo hacia delante-izquierda
+                twist.linear.x  =  self.v_lin * 0.5
+                twist.linear.y  =  self.v_lin * 0.5
                 twist.angular.z =  0.0
-                action = f"FRONT-RIGHT {closest_distance:.2f} m -> recul + move FRONT-LEFT"
+                action = f"FRONT-RIGHT {closest_distance:.2f} m -> move FRONT-LEFT"
 
             elif closest_zone == 'RIGHT':
-                # Demasiado cerca de la pared derecha:
-                # control proporcional directo sobre vy — el error de distancia
-                # se convierte en velocidad lateral sin necesidad de girar.
-                lateral_error  = self.base_distance - min_right
-                twist.linear.x = self.v_lin
-                twist.linear.y = self._clamp(lateral_error * 1.8, -self.v_lin, self.v_lin)
-                # Corrección de ángulo: comparamos la distancia delantera-derecha con la
-                # trasera-derecha. Si difieren, el robot está girado respecto a la pared
-                # → wz proporcional para enderezarlo. Dead-band de 0.08 m para evitar
-                # oscilaciones cuando el robot ya está suficientemente alineado.
-                if math.isfinite(min_fr_right) and math.isfinite(min_back_right):
-                    align_error = min_back_right - min_fr_right
-                    if abs(align_error) > 0.08:
-                        twist.angular.z = self._clamp(
-                            align_error * 0.4, -self.v_ang * 0.5, self.v_ang * 0.5
-                        )
-                    else:
-                        twist.angular.z = 0.0
-                action = (f"RIGHT {min_right:.2f} m -> follow wall "
-                          f"(vy={twist.linear.y:.2f}, wz={twist.angular.z:.2f})")
+                # Demasiado cerca de la pared derecha
+                if closest_distance < self.base_distance * 0.5:
+                    # Si está muy cerca, damos más prioridad a ir a la izquierda
+                    twist.linear.x  =  0.0
+                    twist.linear.y  =  self.v_lin * 0.3
+                    twist.angular.z =  0.0
+                    action = f"RIGHT too CLOSE ({closest_distance:.2f} m) -> move LEFT"
+                
+                # Si está a una distancia moderada, movemos hacia la delante y corregimos el ángulo
+                else:
+                    twist.linear.x = self.v_lin
+                    twist.linear.y = 0.0
+                    # Corrección de ángulo dependiendo del min_right_angle (queremos -90°):
+                    angular_correction = (min_right_angle + 90) * 0.2
+                    twist.angular.z = self._saturate(angular_correction * self.v_ang, self.v_ang)
+                    action = (f"RIGHT {min_right:.2f} m -> follow wall "
+                            f"(vy={twist.linear.y:.2f}, wz={twist.angular.z:.2f})")
 
             elif closest_zone == 'BACK_RIGHT':
                 # La pared ha quedado detrás-derecha (el robot se alejó demasiado):
                 # movimiento diagonal adelante-derecha a 45° para recuperar
                 # la posición de seguimiento sin girar.
-                twist.linear.x  =  self.v_lin * 0.7
-                twist.linear.y  = -self.v_lin * 0.7
+                twist.linear.x  =  self.v_lin * 0.5
+                twist.linear.y  = -self.v_lin * 0.5
                 twist.angular.z =  0.0
                 action = f"BACK-RIGHT {closest_distance:.2f} m -> move FRONT-RIGHT"
 
