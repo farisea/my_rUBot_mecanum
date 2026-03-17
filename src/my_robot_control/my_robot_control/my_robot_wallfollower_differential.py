@@ -162,7 +162,7 @@ class WallFollower(Node):
         #----------------------------------------------------------
         # RULE 3: RIGHT visible → control with tolerance band (no vy)
         #----------------------------------------------------------
-        elif math.isfinite(min_right):
+        elif math.isfinite(min_right) and min_right < min_back_right:
             # error > 0 → too far; error < 0 → too close
             error = min_right - self.base_distance
 
