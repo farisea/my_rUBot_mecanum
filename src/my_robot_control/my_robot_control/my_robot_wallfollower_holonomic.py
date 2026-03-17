@@ -60,6 +60,10 @@ class WallFollower(Node):
             "WallFollower holonomic enabled (uses vx, vy and wz for mecanum)."
         )
 
+        # Ticks de LiDAR mirando el frente
+        self.ticks_front = 0
+        self.ticks_angular_z = 0
+
     #--------------------------------------------------------------------
     def stop_watchdog(self):
         """Stop the robot after time_to_stop seconds."""
@@ -191,11 +195,33 @@ class WallFollower(Node):
             zone_min.items(), key=lambda item: item[1]
         )
 
-        # PRIORIDAD 1: obstáculo cercano → evasión holonómica reactiva
+        # PRIORIDAD 1: giro si ha pasado mucho tiempo con obstáculo en el frente
+        if self.ticks_front > 10 or self.ticks_angular_z > 0:
+            # Si los angular ticks son mayores que 0, significa que ya hemos empezado a girar, así que seguimos girando hasta completar la maniobra
+            # Paramos cuando llegue a 10 ticks angular
+            if self.ticks_angular_z > 10:
+                self.ticks_front = 0
+                self.ticks_angular_z = 0
+                action = f"FRONT completed turn left. FINAL turn LEFT tick={self.ticks_angular_z}"
+            else:
+                # Giramos a la izquierda
+                twist.linear.x  = 0.0
+                twist.linear.y  = 0.0
+                twist.angular.z = self.v_ang
+
+                # Reiniciamos los ticks para evitar que se acumulen indefinidamente
+                self.ticks_front = 0
+                self.ticks_angular_z += 1
+                action = f"FRONT time-out ({closest_distance:.2f} m) -> turn LEFT tick={self.ticks_angular_z}"
+            
+            
+        # PRIORIDAD 2: obstáculo cercano → evasión holonómica reactiva
         if math.isfinite(closest_distance) and closest_distance < reaction_limit:
 
             # Para cada zona, la reacción se adapta a la dirección del obstáculo:
             if closest_zone == 'FRONT':
+                # Añadimos un tick
+                self.ticks_front += 1
                 """
                 if math.isfinite(min_left) and min_left < self.base_distance * 0.9:
                     # Esquina interior (bloqueado por delante y por la izquierda):
@@ -265,30 +291,6 @@ class WallFollower(Node):
                 twist.linear.y  = -self.v_lin
                 twist.angular.z =  0.0
                 action = f"BACK {closest_distance:.2f} m -> move RIGHT"
-
-        # PRIORIDAD 2: seguimiento normal de la pared derecha
-        # Igual que el caso RIGHT de arriba pero con ganancia más alta (3.0 vs 1.8)
-        # porque aquí no hay urgencia de evasión y podemos ser más precisos con
-        # la distancia objetivo. vy y wz actúan de forma independiente y simultánea.
-        
-        elif math.isfinite(min_right):
-            lateral_error  = self.base_distance - min_right
-            twist.linear.x = self.v_lin
-            # Higher gain (3.0) to stay close to the target distance
-            twist.linear.y = self._clamp(lateral_error * 3.0,
-                                          -0.8 * self.v_lin, 0.8 * self.v_lin)
-            # Alignment correction with dead-band to avoid oscillation
-            if math.isfinite(min_fr_right) and math.isfinite(min_back_right):
-                align_error = min_back_right - min_fr_right
-                if abs(align_error) > 0.08:
-                    twist.angular.z = self._clamp(
-                        align_error * 0.4, -self.v_ang * 0.5, self.v_ang * 0.5
-                    )
-                else:
-                    twist.angular.z = 0.0
-            action = (f"TRACK RIGHT ({min_right:.2f} m, target {self.base_distance:.2f}) "
-                      f"-> vx={twist.linear.x:.2f}, vy={twist.linear.y:.2f}, "
-                      f"wz={twist.angular.z:.2f}")
 
         # PRIORIDAD 3: sin pared visible → búsqueda activa
         # El robot avanza en diagonal hacia la derecha y gira levemente en sentido
