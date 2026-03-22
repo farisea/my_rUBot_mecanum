@@ -28,6 +28,10 @@ Webgraphy:
 - [ROSbot Husarion Tutorials](https://husarion.com/tutorials/)
 - [ROSbot Husarion github](https://github.com/husarion/rosbot_ros/tree/humble)
 
+Materials:
+- [rUBot mecanum chasis](https://es.aliexpress.com/item/4000153063891.html)
+- [Mecanum Wheels1](https://es.aliexpress.com/item/4001126656558.html)
+- [Mecanum Wheels2](https://es.aliexpress.com/item/4000131443196.html)
 
 ## **1. Setup the robot project in virtual environment for simulation**
 

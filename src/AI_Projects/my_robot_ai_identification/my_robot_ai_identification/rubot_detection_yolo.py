@@ -25,24 +25,25 @@ from tf_transformations import euler_from_quaternion, quaternion_from_euler
 class YoloObjectDetection(Node):
     def __init__(self):
         super().__init__('object_detection')
-        self.declare_parameter('use_sim_time', False) # Allow sim time when set from launch
         # ------------------- Parameters -------------------
         self.declare_parameter('modelYolo', 'yolov8n_custom.pt')
         self.declare_parameter('topic', '/image_raw')
         self.declare_parameter('front_distance', 1.0)
         self.declare_parameter('sign_frame', 'map')
-        self.declare_parameter('base_frame', 'base_link')  # or base_footprint
-        self.declare_parameter('sign_positions', {})  # dict: {SignName: [x, y]}
+        self.declare_parameter('base_frame', 'base_link')
+
+        # Single compact parameter for sign positions
+        self.declare_parameter('sign_specs', ['STOP,0.0,0.0'])
 
         # Hold times (seconds)
         self.declare_parameter('hold_stop_s', 3.0)
         self.declare_parameter('hold_prohibido_s', 5.0)
         self.declare_parameter('hold_ceda_s', 2.0)
-        self.declare_parameter('cooldown_repeat_s', 5.0)  # avoid repeated triggers
+        self.declare_parameter('cooldown_repeat_s', 5.0)
 
         # Waypoint offsets (meters)
-        self.declare_parameter('wp_forward_m', 0.8)   # go forward after sign (STOP/Ceda)
-        self.declare_parameter('wp_lateral_m', 0.65)  # lateral bypass (Prohibido / turns)
+        self.declare_parameter('wp_forward_m', 0.8)
+        self.declare_parameter('wp_lateral_m', 0.65)
 
         # Read parameters
         model_file = self.get_parameter('modelYolo').value
@@ -59,18 +60,33 @@ class YoloObjectDetection(Node):
         self.wp_forward_m = float(self.get_parameter('wp_forward_m').value)
         self.wp_lateral_m = float(self.get_parameter('wp_lateral_m').value)
 
-        raw_sign_positions = self.get_parameter('sign_positions').value
-        if not isinstance(raw_sign_positions, dict):
-            raise RuntimeError(f"sign_positions must be a dict. Got {type(raw_sign_positions)}")
-
-        # Validate sign_positions: each value must be [x, y]
+        # Parse sign specifications
+        raw_sign_specs = self.get_parameter('sign_specs').value
         self.sign_positions = {}
-        for name, xy in raw_sign_positions.items():
-            if (not isinstance(xy, (list, tuple))) or len(xy) != 2:
-                self.get_logger().warn(f'Ignoring sign "{name}": expected [x,y], got {xy}')
-                continue
-            self.sign_positions[str(name)] = (float(xy[0]), float(xy[1]))
 
+        for item in raw_sign_specs:
+            if not isinstance(item, str):
+                self.get_logger().warn(f'Ignoring sign spec (not a string): {item}')
+                continue
+
+            parts = [p.strip() for p in item.split(',')]
+            if len(parts) != 3:
+                self.get_logger().warn(
+                    f'Ignoring sign spec "{item}": expected format "Name,x,y"'
+                )
+                continue
+
+            name, xs, ys = parts
+            try:
+                x = float(xs)
+                y = float(ys)
+            except ValueError:
+                self.get_logger().warn(
+                    f'Ignoring sign spec "{item}": x and y must be numeric'
+                )
+                continue
+
+            self.sign_positions[name] = (x, y)
         # ------------------- TF (map -> base_link) -------------------
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)

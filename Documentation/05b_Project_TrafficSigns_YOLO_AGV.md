@@ -20,6 +20,29 @@ pip3 uninstall numpy
 pip3 install "numpy<2.0"
 ````
 
+For simulation, you won't be able to use TheConstruct environment. You have to use your **Docker container ROS2 custom environment**:
+- Use VScode and clone your project repository
+- Edit `docker-compose.yaml` from `network_config/humble`
+- Comment or delete the environment variables: 
+    - ROS_AUTOMATIC_DISCOVERY_RANGE=OFF
+    - ROS_STATIC_PEERS=192.168.1.54
+    - CYCLONEDDS_URI=file:///config/cyclonedds_pc.xml
+- Open a terminal in `network_config/humble` and write:
+    ````bash
+    docker compose up
+    ````
+- Open a VScode window attached to the created container
+- Clone your project repository
+- open `.bashrc` file and add:
+    ````xml
+    source /opt/ros/humble/setup.bash
+    source /root/my_rUBot_mecanum/install/setup.bash
+    export GAZEBO_MODEL_PATH=/root/my_rUBot_mecanum/src/my_robot_bringup/models:$GAZEBO_MODEL_PATH
+    cd /root/my_rUBot_mecanum
+    ````
+You have now your custom docker ROS2 workspace ready!
+
+
 ## **2. Robot Navigation**
 
 To proceed with the signal identification we first bringup the robot and navigate from initial pose to final target.
@@ -51,13 +74,13 @@ To proceed with the signal identification we first bringup the robot and navigat
         ````bash
         ros2 launch my_robot_navigation2 navigation2_robot.launch.py use_sim_time:=true map_file:=map_square4m_sign.yaml params_file:=rubot_sw.yaml
         ````
-        >For LIMO: We use `limo_sw.yaml` file. In case we want to priorize the lidar data from odometry data we will use `limo_sw_lidar.yaml`. Equivalent names are found for rUBot real robot.
+        >In case we want to priorize the lidar data from odometry data we will use `rubot_sw_lidar.yaml`. Equivalent names are found for rUBot real robot.
 
         ![](./Images/07_Yolo/10_nav_sw.png)
 
     - In real robot rUBot:
         ````shell
-        ros2 launch my_robot_navigation2 navigation2_robot.launch.py use_sim_time:=false map_file:=map_project.yaml params_file:=rubot_real.yaml
+        ros2 launch my_robot_navigation2 navigation2_robot.launch.py use_sim_time:=false map_file:=map_project.yaml params_file:=rubot_real_lidar.yaml
         ````
         > Be sure the Odometry message is zero when starting the navigation.
 
@@ -79,8 +102,8 @@ The main characteristics of this `object_detection` node are:
 - Publishes a new waypoint in the `/traffic_waypoint` topic when a `left`or `right` sign is detected
 
 You can see that this `object_detection` node is:
-- usefull for  `stop`, `ceda` and `forbidden` signs, because the robot has to stop the movement
-- NOT usefull for `turn right` and `turn left` signs, because the node publishes a new `waypoint` who is not able to be automatically integrated in the navigation2 stack.
+- usefull for  `stop`, `give` and `forbidden` signs, because the robot has to stop the movement
+- NOT enough for `turn right` and `turn left` signs, because the node publishes a new `waypoint` who is not able to be automatically integrated in the navigation2 stack.
 
 We have to create a new `custom_nav2` node that can integrate the new waypoint in the navigation2 stack.
 - The schematic nodes, topics and messages are shown below:
@@ -89,11 +112,11 @@ We have to create a new `custom_nav2` node that can integrate the new waypoint i
 **Software** test in Gazebo: 
 - Use the ``rubot_detection_yolo.py`` after the navigation node is launched.
     ````shell
-    ros2 run my_robot_ai_identification rubot_detection_yolo_exec
+    ros2 launch my_robot_ai_identification rubot_detection_yolo.launch.py use_sim_time:=True
     ````
     > You have to verify the model path to '/home/user/ROS2_rUBot_mecanum_ws/src/AI_Projects/my_robot_ai_identification/models/yolov8n_custom.pt
 
-    > Verify also the the camera topic if you are using rUBot or Limo
+    > Verify also the camera topic if you are using rUBot or Limo
 
 - To see the image with prediction:
     - on RVIZ2, select a new Image message on topic /inference_result
@@ -107,7 +130,7 @@ We have to create a new `custom_nav2` node that can integrate the new waypoint i
 **Hardware** Test in real robot:
 - If you want to execute on real `rUBot robot`, you have to execute:
     ````shell
-    ros2 launch my_robot_ai_identification rubot_detection_wp_yolo.launch.py
+    ros2 launch my_robot_ai_identification rubot_detection_yolo.launch.py
     ````
     > - If you want to execute on real `LIMO robot`, you have to install and execute on the Limo robot container:
 
@@ -120,7 +143,7 @@ We have to create a new `custom_nav2` node that can integrate the new waypoint i
     >    pip3 install "numpy<2.0"
     >    #
     >    apt install git
-    >    git clone https://github.com/manelpuig/ROS2_rUBot_mecanum_ws.git
+    >    git clone https://github.com/manelpuig/my_robot_mecanum_ws.git
     >    source /opt/ros/humble/setup.bash
     >    apt install python3-colcon-common-extensions
     >    apt install build-essential
@@ -148,7 +171,7 @@ To launch the robot Custom Navigation with signal detection, use:
     ````shell
     ros2 launch my_robot_navigation2 navigation2_robot.launch.py use_sim_time:=true map_file:=map_square4m_sign.yaml params_file:=rubot_sw_lidar.yaml
     ````
-    > In real robot case use `use_sim_time:=false` and `map_project.yaml` and `rubot_hw_lidar.yaml` files
+    > In real robot case use `use_sim_time:=false` and `map_project.yaml` and `rubot_real_lidar.yaml` files
 - Launch the `object_detection` node with:
     ````shell
     ros2 launch my_robot_ai_identification rubot_detection_yolo.launch.py use_sim_time:=true yolo_params:=yolo_signals_sw.yaml
@@ -171,7 +194,7 @@ ros2 launch my_robot_ai_identification rubot_nav2_detection_targets.launch.py us
 ````
 In `real robot`:
 ````shell
-ros2 launch my_robot_ai_identification rubot_nav2_detection_targets.launch.py use_sim_time:=false map_file:=map_project.yaml params_file:=rubot_hw_lidar.yaml yolo_params:=yolo_signals.yaml nav_params:=yolo_targets.yaml nav_start_delay:=2.0
+ros2 launch my_robot_ai_identification rubot_nav2_detection_targets.launch.py use_sim_time:=false map_file:=map_project.yaml params_file:=rubot_real_lidar.yaml yolo_params:=yolo_signals.yaml nav_params:=yolo_targets.yaml nav_start_delay:=2.0
 ````
 
 | AI Identification and Navigation video | Code execution video |
