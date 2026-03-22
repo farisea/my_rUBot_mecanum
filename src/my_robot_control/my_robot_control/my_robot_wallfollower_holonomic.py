@@ -308,6 +308,9 @@ class WallFollower(Node):
         # El robot avanza en diagonal hacia la derecha y gira levemente en sentido
         # horario para barrer el espacio hasta encontrar la pared derecha.
         else:
+            # Reset de ticks
+            self.ticks_front = 0
+            
             twist.linear.x  =  0.0
             twist.linear.y  = -self.v_lin * 0.4
             twist.angular.z =  0.0
