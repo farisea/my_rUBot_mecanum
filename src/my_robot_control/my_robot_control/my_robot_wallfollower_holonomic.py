@@ -64,6 +64,10 @@ class WallFollower(Node):
         self.ticks_front = 0
         self.ticks_angular_z = 0
 
+        # Máx ticks virtual
+        self.max_front = 15
+        self.max_z = 12
+
     #--------------------------------------------------------------------
     def stop_watchdog(self):
         """Stop the robot after time_to_stop seconds."""
@@ -134,8 +138,6 @@ class WallFollower(Node):
         # Ángulos mínimos para las zonas principales
         min_front_angle = math.inf
         min_right_angle = math.inf
-        min_back_angle  = math.inf
-        min_left_angle  = math.inf
 
         for i, d in enumerate(scan.ranges):
             if not math.isfinite(d):
@@ -145,7 +147,7 @@ class WallFollower(Node):
 
             ang = angle_min + i * angle_inc
 
-            if   -40  <= ang <=  40:
+            if   -30  <= ang <=  40:
                 if d < min_front:
                     min_front = d
                     min_front_angle = ang
@@ -153,13 +155,12 @@ class WallFollower(Node):
             elif  40  <  ang <= 140:
                 if d < min_left:
                     min_left = d
-                    min_left_angle = ang
 
-            elif -50  <= ang <  -40:
+            elif -40  <= ang <  -30:
                 if d < min_fr_right:
                     min_fr_right = d
 
-            elif -130 <= ang <  -50:
+            elif -130 <= ang <  -40:
                 if d < min_right:
                     min_right = d
                     min_right_angle = ang
@@ -171,7 +172,6 @@ class WallFollower(Node):
             elif ang < -140 or ang > 140:
                 if d < min_back:
                     min_back = d
-                    min_back_angle = ang
 
         twist  = Twist()
         action = ""
@@ -195,11 +195,11 @@ class WallFollower(Node):
             zone_min.items(), key=lambda item: item[1]
         )
 
-        # PRIORIDAD 1: giro si ha pasado mucho tiempo con obstáculo en el frente
-        if self.ticks_front > 10 or self.ticks_angular_z > 0:
+        # PRIORIDAD 1: giro si ha pasado mucho tiempo con obstáculo en el frente o ve algo a la izquierda
+        if self.ticks_front > self.max_front or self.ticks_angular_z > 0:
             # Si los angular ticks son mayores que 0, significa que ya hemos empezado a girar, así que seguimos girando hasta completar la maniobra
-            # Paramos cuando llegue a 10 ticks angular
-            if self.ticks_angular_z > 10:
+            # Paramos cuando llegue a 12 ticks angular
+            if self.ticks_angular_z > self.max_z:
                 self.ticks_front = 0
                 self.ticks_angular_z = 0
                 action = f"FRONT completed turn left. FINAL turn LEFT tick={self.ticks_angular_z}"
@@ -207,7 +207,7 @@ class WallFollower(Node):
                 # Giramos a la izquierda
                 twist.linear.x  = 0.0
                 twist.linear.y  = 0.0
-                twist.angular.z = self.v_ang
+                twist.angular.z = self.v_ang * 3
 
                 # Reiniciamos los ticks para evitar que se acumulen indefinidamente
                 self.ticks_front = 0
@@ -216,7 +216,7 @@ class WallFollower(Node):
             
             
         # PRIORIDAD 2: obstáculo cercano → evasión holonómica reactiva
-        if math.isfinite(closest_distance) and closest_distance < reaction_limit:
+        elif math.isfinite(closest_distance) and closest_distance < reaction_limit:
 
             # Para cada zona, la reacción se adapta a la dirección del obstáculo:
             if closest_zone == 'FRONT':
@@ -246,7 +246,7 @@ class WallFollower(Node):
                     twist.linear.x  =  0.0
                     twist.linear.y  =  self.v_lin
                     twist.angular.z =  self._saturate(angular_correction_ratio * self.v_ang, self.v_ang)
-                action = f"FRONT {closest_distance:.2f} m -> move LEFT + rotate to 0°"
+                action = f"FRONT {closest_distance:.2f} m -> move LEFT + rotate to 0°. Ticks = {self.ticks_front}"
 
             elif closest_zone == 'FRONT_RIGHT':
                 # Obstáculo en diagonal delantera-derecha:
@@ -296,9 +296,9 @@ class WallFollower(Node):
         # El robot avanza en diagonal hacia la derecha y gira levemente en sentido
         # horario para barrer el espacio hasta encontrar la pared derecha.
         else:
-            twist.linear.x  =  self.v_lin * 0.4
+            twist.linear.x  =  0.0
             twist.linear.y  = -self.v_lin * 0.4
-            twist.angular.z = -self.v_ang * 0.3
+            twist.angular.z =  0.0
             action = "No wall detected -> search RIGHT wall"
 
         self.cmd = twist
