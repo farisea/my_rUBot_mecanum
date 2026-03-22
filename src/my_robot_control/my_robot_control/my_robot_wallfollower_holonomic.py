@@ -249,6 +249,9 @@ class WallFollower(Node):
                 action = f"FRONT {closest_distance:.2f} m -> move LEFT + rotate to 0°. Ticks = {self.ticks_front}"
 
             elif closest_zone == 'FRONT_RIGHT':
+                # Reset de ticks
+                self.ticks_front = 0
+
                 # Obstáculo en diagonal delantera-derecha:
                 # movimiento oblicuo hacia delante-izquierda
                 twist.linear.x  =  self.v_lin * 0.5
@@ -257,6 +260,9 @@ class WallFollower(Node):
                 action = f"FRONT-RIGHT {closest_distance:.2f} m -> move FRONT-LEFT"
 
             elif closest_zone == 'RIGHT':
+                # Reset de ticks
+                self.ticks_front = 0
+
                 # Demasiado cerca de la pared derecha
                 if closest_distance < self.base_distance * 0.5:
                     # Si está muy cerca, damos más prioridad a ir a la izquierda
@@ -276,6 +282,9 @@ class WallFollower(Node):
                             f"(vy={twist.linear.y:.2f}, wz={twist.angular.z:.2f})")
 
             elif closest_zone == 'BACK_RIGHT':
+                # Reset de ticks
+                self.ticks_front = 0
+
                 # La pared ha quedado detrás-derecha (el robot se alejó demasiado):
                 # movimiento diagonal adelante-derecha a 45° para recuperar
                 # la posición de seguimiento sin girar.
@@ -285,6 +294,9 @@ class WallFollower(Node):
                 action = f"BACK-RIGHT {closest_distance:.2f} m -> move FRONT-RIGHT"
 
             elif closest_zone == 'BACK':
+                # Reset de ticks
+                self.ticks_front = 0
+                
                 # Pared justo detrás (solo activo si las demás zonas están despejadas):
                 # strafe puro a la derecha para ir a buscar la pared lateral.
                 twist.linear.x  =  0.0
