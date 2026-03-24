@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import time
+import os
+import yaml
 
 import rclpy
 from rclpy.node import Node
@@ -15,47 +16,35 @@ class NavigationTask(Node):
 
         self.navigator = BasicNavigator()
 
-        # Declare parameters as lists (not strings)
-        self.declare_parameter('initial_pose', [0.0, 0.0, 0.0])
-        self.declare_parameter('waypoints', [])
-        self.declare_parameter('final_pose', [0.0, 0.0, 0.0])
+        # Only one ROS parameter: path to external YAML file
+        self.declare_parameter('wp_file', '')
 
-        # Read parameters (already parsed)
-        initial_pose_val = self.get_parameter('initial_pose').value
-        waypoints_val = self.get_parameter('waypoints').value
-        final_pose_val = self.get_parameter('final_pose').value
+        wp_file = self.get_parameter('wp_file').value
+        if not wp_file:
+            raise ValueError("Parameter 'wp_file' is empty")
 
-        self.initial_pose = self._parse_points(initial_pose_val, expect='pose')
-        self.waypoints = self._parse_points(waypoints_val, expect='waypoints')
-        self.final_pose = self._parse_points(final_pose_val, expect='pose')
+        self.initial_pose, self.waypoints, self.final_pose = self._load_waypoints_file(wp_file)
 
+        self.get_logger().info(f"Waypoint file: {wp_file}")
         self.get_logger().info(f"Initial pose: {self.initial_pose}")
         self.get_logger().info(f"Waypoints: {self.waypoints}")
         self.get_logger().info(f"Final pose: {self.final_pose}")
 
-    def _parse_points(self, val, expect: str):
-        """
-        expect='pose'      -> expects [x,y,yaw] and returns (x,y,yaw)
-        expect='waypoints' -> expects [] or [[x,y,yaw], ...] and returns [(x,y,yaw), ...]
-        """
-        if expect == 'pose':
-            if not isinstance(val, (list, tuple)) or len(val) != 3:
-                raise ValueError(f'Expected [x,y,yaw]. Got: {val}')
-            return (float(val[0]), float(val[1]), float(val[2]))
+    def _load_waypoints_file(self, filepath):
+        if not os.path.isfile(filepath):
+            raise FileNotFoundError(f"Waypoint file not found: {filepath}")
 
-        if expect == 'waypoints':
-            if val is None:
-                return []
-            if not isinstance(val, list):
-                raise ValueError(f'Expected list of waypoints. Got: {val}')
-            parsed = []
-            for item in val:
-                if not isinstance(item, (list, tuple)) or len(item) != 3:
-                    raise ValueError(f'Each waypoint must be [x,y,yaw]. Got: {item}')
-                parsed.append((float(item[0]), float(item[1]), float(item[2])))
-            return parsed
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
 
-        raise ValueError(f'Unknown expect: {expect}')
+        if data is None:
+            raise ValueError(f"Waypoint file is empty: {filepath}")
+
+        initial_pose = tuple(data['initial_pose'])
+        waypoints = [tuple(wp) for wp in data.get('waypoints', [])]
+        final_pose = tuple(data['final_pose'])
+
+        return initial_pose, waypoints, final_pose
 
     def _create_pose_stamped(self, x, y, yaw):
         q_x, q_y, q_z, q_w = tf_transformations.quaternion_from_euler(0.0, 0.0, yaw)
@@ -64,8 +53,8 @@ class NavigationTask(Node):
         pose.header.frame_id = 'map'
         pose.header.stamp = self.get_clock().now().to_msg()
 
-        pose.pose.position.x = x
-        pose.pose.position.y = y
+        pose.pose.position.x = float(x)
+        pose.pose.position.y = float(y)
         pose.pose.position.z = 0.0
 
         pose.pose.orientation.x = q_x
@@ -82,17 +71,17 @@ class NavigationTask(Node):
 
     def wait_for_nav2(self):
         self.navigator.waitUntilNav2Active()
-        self.get_logger().info("Nav2 is active.")
+        self.get_logger().info("Nav2 is active")
 
     def run_navigation(self):
         final_x, final_y, final_yaw = self.final_pose
 
         if len(self.waypoints) == 0:
-            self.get_logger().info("No waypoints. Going directly to final pose.")
+            self.get_logger().info("No waypoints: going directly to final pose")
             goal = self._create_pose_stamped(final_x, final_y, final_yaw)
             self.navigator.goToPose(goal)
         else:
-            self.get_logger().info(f"Following {len(self.waypoints)} waypoints and then final pose.")
+            self.get_logger().info(f"Following {len(self.waypoints)} waypoints and then final pose")
             pose_list = [self._create_pose_stamped(x, y, yaw) for (x, y, yaw) in self.waypoints]
             pose_list.append(self._create_pose_stamped(final_x, final_y, final_yaw))
             self.navigator.followWaypoints(pose_list)
@@ -107,6 +96,7 @@ class NavigationTask(Node):
 
 def main(args=None):
     rclpy.init(args=args)
+
     node = NavigationTask()
 
     node.set_initial_pose()

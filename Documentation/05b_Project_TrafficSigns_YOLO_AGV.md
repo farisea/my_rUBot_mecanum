@@ -27,15 +27,23 @@ For simulation, you won't be able to use TheConstruct environment. You have to u
     - ROS_AUTOMATIC_DISCOVERY_RANGE=OFF
     - ROS_STATIC_PEERS=192.168.1.54
     - CYCLONEDDS_URI=file:///config/cyclonedds_pc.xml
+    - Choose DISPLAY:
+        - DISPLAY=${DISPLAY} #Ubuntu
+        - DISPLAY=host.docker.internal:0.0 #Windows 
+- Verify in PC-win `entrypoint_pc.sh` has `LF` NOT `CRLF`
 - Open a terminal in `network_config/humble` and write:
     ````bash
     docker compose up
     ````
+- Install for graphical interface:
+    - For Ubuntu: https://mac.getutm.app/
+    - For Windows: https://sourceforge.net/projects/vcxsrv/files/latest/download
 - Open a VScode window attached to the created container
 - Clone your project repository
 - open `.bashrc` file and add:
     ````xml
     source /opt/ros/humble/setup.bash
+    source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
     source /root/my_rUBot_mecanum/install/setup.bash
     export GAZEBO_MODEL_PATH=/root/my_rUBot_mecanum/src/my_robot_bringup/models:$GAZEBO_MODEL_PATH
     cd /root/my_rUBot_mecanum
@@ -112,7 +120,7 @@ We have to create a new `custom_nav2` node that can integrate the new waypoint i
 **Software** test in Gazebo: 
 - Use the ``rubot_detection_yolo.py`` after the navigation node is launched.
     ````shell
-    ros2 launch my_robot_ai_identification rubot_detection_yolo.launch.py use_sim_time:=True
+    ros2 launch my_robot_ai_identification rubot_detection_yolo.launch.py use_sim_time:=True yolo_params:=yolo_signals_sw.yaml
     ````
     > You have to verify the model path to '/home/user/ROS2_rUBot_mecanum_ws/src/AI_Projects/my_robot_ai_identification/models/yolov8n_custom.pt
 

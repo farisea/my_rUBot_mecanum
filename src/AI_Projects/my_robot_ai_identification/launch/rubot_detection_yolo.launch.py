@@ -1,50 +1,60 @@
 #!/usr/bin/env python3
-import os
-
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-    pkg_path = get_package_share_directory('my_robot_ai_identification')
 
-    use_sim_time = LaunchConfiguration('use_sim_time')
-    yolo_params = LaunchConfiguration('yolo_params')
-
-    declare_use_sim_time = DeclareLaunchArgument(
-        'use_sim_time',
-        default_value='true',
-        description='Use simulation clock if true'
+    model_arg = DeclareLaunchArgument(
+        'modelYolo',
+        default_value='yolov8n_custom.pt',
+        description='YOLO model filename inside models/'
     )
 
-    declare_yolo_params = DeclareLaunchArgument(
-        'yolo_params',
-        default_value='yolo_signals.yaml',
-        description='YAML config file inside config/'
+    topic_arg = DeclareLaunchArgument(
+        'topic',
+        default_value='/camera/image_raw',
+        description='Image topic'
     )
 
-    yolo_params_file = PathJoinSubstitution([
-        pkg_path,
-    'config',
-        yolo_params
+    front_distance_arg = DeclareLaunchArgument(
+        'front_distance',
+        default_value='1.0',
+        description='Maximum valid distance to sign in meters'
+    )
+
+    signs_name_arg = DeclareLaunchArgument(
+        'signs_name',
+        default_value='yolo_signals_sw.yaml',
+        description='Signs YAML filename inside config/'
+    )
+
+    signs_file = PathJoinSubstitution([
+        FindPackageShare('my_robot_ai_identification'),
+        'config',
+        LaunchConfiguration('signs_name')
     ])
 
-    yolo_node = Node(
+    node = Node(
         package='my_robot_ai_identification',
         executable='rubot_detection_yolo_exec',
         name='object_detection',
         output='screen',
-        parameters=[
-            yolo_params_file,
-            {'use_sim_time': use_sim_time},
-        ],
+        parameters=[{
+            'modelYolo': LaunchConfiguration('modelYolo'),
+            'topic': LaunchConfiguration('topic'),
+            'front_distance': LaunchConfiguration('front_distance'),
+            'signs_file': signs_file,
+        }]
     )
 
     return LaunchDescription([
-        declare_use_sim_time,
-        declare_yolo_params,
-        yolo_node
+        model_arg,
+        topic_arg,
+        front_distance_arg,
+        signs_name_arg,
+        node
     ])
