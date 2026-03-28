@@ -101,7 +101,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -121,7 +121,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -147,7 +147,7 @@
           </inertia>
         </inertial>
       </link>
-      <pose>0.025868 -0.005277 0 0 -0 0</pose>
+      <pose>0.025868 -0.005277 0.3 0 -0 0</pose>
       <self_collide>false</self_collide>
     </model>
     <model name='wall120cm_0'>
@@ -156,7 +156,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -176,7 +176,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -202,17 +202,17 @@
           </inertia>
         </inertial>
       </link>
-      <pose>-0.54837 -0.623096 0 0 0 -1.57402</pose>
+      <pose>-0.54837 -0.623096 0.3 0 0 -1.57402</pose>
       <self_collide>false</self_collide>
     </model>
     <model name='wall90cm'>
       <static>true</static>
-      <pose>1.01848 -0.064701 0 0 0 -0.130317</pose>
+      <pose>1.01848 -0.064701 0.3 0 0 -0.130317</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.9 0.05 0.3</size>
+              <size>0.9 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -232,7 +232,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.9 0.05 0.3</size>
+              <size>0.9 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -262,12 +262,12 @@
     </model>
     <model name='wall90cm_0'>
       <static>true</static>
-      <pose>1.88 -0.36 0 0 0 -0.53</pose>
+      <pose>1.88 -0.36 0.3 0 0 -0.53</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.9 0.05 0.3</size>
+              <size>0.9 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -287,7 +287,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.9 0.05 0.3</size>
+              <size>0.9 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -317,12 +317,12 @@
     </model>
     <model name='wall90cm_0_1'>
       <static>true</static>
-      <pose>2.70059 -0.54056 0 0 -0 0.108521</pose>
+      <pose>2.70059 -0.54056 0.3 0 -0 0.108521</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.9 0.05 0.3</size>
+              <size>0.9 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -342,7 +342,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.9 0.05 0.3</size>
+              <size>0.9 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -372,12 +372,12 @@
     </model>
     <model name='wall90cm_0_1_1'>
       <static>true</static>
-      <pose>3.51692 -0.303152 0 0 -0 0.453864</pose>
+      <pose>3.51692 -0.303152 0.3 0 -0 0.453864</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.9 0.05 0.3</size>
+              <size>0.9 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -397,7 +397,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.9 0.05 0.3</size>
+              <size>0.9 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -431,7 +431,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -451,7 +451,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -477,7 +477,7 @@
           </inertia>
         </inertial>
       </link>
-      <pose>4.24863 -0.05808 0 0 -0 0</pose>
+      <pose>4.24863 -0.05808 0.3 0 -0 0</pose>
       <self_collide>false</self_collide>
     </model>
     <model name='wall120cm_0_1'>
@@ -486,7 +486,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -506,7 +506,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -532,17 +532,17 @@
           </inertia>
         </inertial>
       </link>
-      <pose>4.82576 -0.63114 0 0 0 -1.57402</pose>
+      <pose>4.82576 -0.63114 0.3 0 0 -1.57402</pose>
       <self_collide>false</self_collide>
     </model>
     <model name='wall60cm_1'>
       <static>true</static>
-      <pose>4.71252 -1.53217 0 0 -0 1.20175</pose>
+      <pose>4.71252 -1.53217 0.3 0 -0 1.20175</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.6 0.05 0.3</size>
+              <size>0.6 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -562,7 +562,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.6 0.05 0.3</size>
+              <size>0.6 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -579,12 +579,12 @@
     </model>
     <model name='wall60cm_1_1'>
       <static>true</static>
-      <pose>4.29322 -1.79983 0 0 0 -0.094563</pose>
+      <pose>4.29322 -1.79983 0.3 0 0 -0.094563</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.6 0.05 0.3</size>
+              <size>0.6 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -604,7 +604,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.6 0.05 0.3</size>
+              <size>0.6 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -625,7 +625,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -645,7 +645,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -671,7 +671,7 @@
           </inertia>
         </inertial>
       </link>
-      <pose>3.43435 -1.83432 0 0 -0 0</pose>
+      <pose>3.43435 -1.83432 0.3 0 -0 0</pose>
       <self_collide>false</self_collide>
     </model>
     <model name='wall120cm_2_1'>
@@ -680,7 +680,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -700,7 +700,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -726,7 +726,7 @@
           </inertia>
         </inertial>
       </link>
-      <pose>2.26196 -1.84473 0 0 -0 0</pose>
+      <pose>2.26196 -1.84473 0.3 0 -0 0</pose>
       <self_collide>false</self_collide>
     </model>
     <model name='wall120cm_2_1_1'>
@@ -735,7 +735,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -755,7 +755,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -781,7 +781,7 @@
           </inertia>
         </inertial>
       </link>
-      <pose>1.07996 -1.85447 0 0 -0 0</pose>
+      <pose>1.07996 -1.85447 0.3 0 -0 0</pose>
       <self_collide>false</self_collide>
     </model>
     <model name='wall120cm_2_1_1_1'>
@@ -790,7 +790,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -810,7 +810,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -836,7 +836,7 @@
           </inertia>
         </inertial>
       </link>
-      <pose>-0.112446 -1.86018 0 0 -0 0</pose>
+      <pose>-0.112446 -1.86018 0.3 0 -0 0</pose>
       <self_collide>false</self_collide>
     </model>
     <model name='wall120cm_0_2'>
@@ -845,7 +845,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -865,7 +865,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>1.2 0.05 0.3</size>
+              <size>1.2 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -891,17 +891,17 @@
           </inertia>
         </inertial>
       </link>
-      <pose>-0.554464 -1.81929 0 0 0 -1.57402</pose>
+      <pose>-0.554464 -1.81929 0.3 0 0 -1.57402</pose>
       <self_collide>false</self_collide>
     </model>
     <model name='wall60cm_2'>
       <static>true</static>
-      <pose>1.20645 -1.05641 0 0 -0 0</pose>
+      <pose>1.20645 -1.05641 0.3 0 -0 0</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.6 0.05 0.3</size>
+              <size>0.6 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -921,7 +921,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.6 0.05 0.3</size>
+              <size>0.6 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -938,12 +938,12 @@
     </model>
     <model name='wall60cm_2_1'>
       <static>true</static>
-      <pose>2.94292 -0.762582 0 0 0 -2.07825</pose>
+      <pose>2.94292 -0.762582 0.3 0 0 -2.07825</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.6 0.05 0.3</size>
+              <size>0.6 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -963,7 +963,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.6 0.05 0.3</size>
+              <size>0.6 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -980,12 +980,12 @@
     </model>
     <model name='wall60cm_2_1_1'>
       <static>true</static>
-      <pose>2.61872 -0.814321 0 0 -0 2.27853</pose>
+      <pose>2.61872 -0.814321 0.3 0 -0 2.27853</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.6 0.05 0.3</size>
+              <size>0.6 0.05 0.6</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -1005,7 +1005,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.6 0.05 0.3</size>
+              <size>0.6 0.05 0.6</size>
             </box>
           </geometry>
           <material>
@@ -1041,3 +1041,4 @@
     </light>
   </world>
 </sdf>
+
