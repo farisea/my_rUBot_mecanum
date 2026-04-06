@@ -60,14 +60,17 @@ class WallFollower(Node):
             "WallFollower holonomic enabled (uses vx, vy and wz for mecanum)."
         )
 
-        # Ticks de LiDAR mirando el frente
+        # Ticks de LiDAR no siguiendo la pared a la derecha
         self.ticks_front = 0
-        self.ticks_angular_z = 0
-        self.rotate_back = False
+        self.ticks_back = 0
         self.rotate_left = False
+
+        # Ticks de giro
+        self.ticks_angular_z = 0
 
         # Máx ticks virtual
         self.max_front = 15
+        self.max_back = 3
         self.max_z = 12
 
     #--------------------------------------------------------------------
@@ -160,16 +163,16 @@ class WallFollower(Node):
                 if d < min_fr_right:
                     min_fr_right = d
 
-            elif -130 <= ang <  -40:
+            elif -140 <= ang <  -40:
                 if d < min_right:
                     min_right = d
                     min_right_angle = ang
 
-            elif -140 <= ang < -130:
+            elif -150 <= ang < -140:
                 if d < min_back_right:
                     min_back_right = d
 
-            elif ang < -140 or ang > 140:
+            elif ang < -150 or ang > 140:
                 if d < min_back:
                     min_back = d
 
@@ -212,11 +215,11 @@ class WallFollower(Node):
                 action = f"FRONT time-out ({closest_distance:.2f} m) -> turn LEFT tick={self.ticks_angular_z}"
 
 
-        # PRIORIDAD 2: giro derecha si hay un obstáculo detrás, para volver seguir la pared
-        elif self.rotate_back:
+        # PRIORIDAD 2: giro derecha si ha pasado mucho tiempo con obstáculo detrás
+        elif self.ticks_back > self.max_back:
             # Paramos cuando haya girado 90 grados
             if self.ticks_angular_z > self.max_z:
-                self.rotate_back = False
+                self.ticks_back = 0
                 self.ticks_angular_z = 0
                 action = f"BACK completed turn right. FINAL turn RIGHT tick={self.ticks_angular_z}"
             else:
@@ -226,9 +229,9 @@ class WallFollower(Node):
                 twist.angular.z = -self.v_ang * 3
 
                 self.ticks_angular_z += 1
-                action = f"BACK detected ({closest_distance:.2f} m) -> turn RIGHT tick={self.ticks_angular_z}"
+                action = f"BACK time-out time-out ({closest_distance:.2f} m) -> turn RIGHT tick={self.ticks_angular_z}"
         
-        # PRIORIDAD 3: giro 180 grados si está detectando un obstáculo a la izquierda, para evitar el choque
+        # PRIORIDAD 3: giro 180 grados si está detectando un obstáculo muy cerca a la izquierda, para evitar el choque
         elif self.rotate_left:
             # Paramos cuando haya girado 180 grados
             if self.ticks_angular_z > self.max_z * 2:
@@ -251,6 +254,9 @@ class WallFollower(Node):
             if closest_zone == 'FRONT':
                 # Añadimos un tick de detección de obstáculo frontal
                 self.ticks_front += 1
+
+                # Reset de ticks
+                self.ticks_back = 0
 
                 # Obstáculo solo por delante, izquierda libre:
                 # Si está muy cerca, damos más prioridad al retroceso para evitar chocar
@@ -278,6 +284,7 @@ class WallFollower(Node):
             elif closest_zone == 'FRONT_RIGHT':
                 # Reset de ticks
                 self.ticks_front = 0
+                self.ticks_back = 0
 
                 # Obstáculo en diagonal delantera-derecha:
                 # movimiento oblicuo hacia delante-izquierda
@@ -289,6 +296,7 @@ class WallFollower(Node):
             elif closest_zone == 'RIGHT':
                 # Reset de ticks
                 self.ticks_front = 0
+                self.ticks_back = 0
 
                 # Demasiado cerca de la pared derecha
                 if closest_distance < self.base_distance * 0.5:
@@ -300,8 +308,8 @@ class WallFollower(Node):
 
                 # Si está muy lejos, se acerca
                 elif closest_distance > self.base_distance * 1.2:
-                    twist.linear.x  =  -self.v_lin * 0.3
-                    twist.linear.y  =  0.0
+                    twist.linear.x  =  0.0
+                    twist.linear.y  =  -self.v_lin * 0.3
                     twist.angular.z =  0.0
                     action = f"RIGHT too FAR ({closest_distance:.2f} m) -> move RIGHT"
                 
@@ -318,6 +326,7 @@ class WallFollower(Node):
             elif closest_zone == 'BACK_RIGHT':
                 # Reset de ticks
                 self.ticks_front = 0
+                self.ticks_back = 0
 
                 # La pared ha quedado detrás-derecha (el robot se alejó demasiado):
                 # movimiento diagonal adelante-derecha a 45° para recuperar
@@ -328,22 +337,39 @@ class WallFollower(Node):
                 action = f"BACK-RIGHT {closest_distance:.2f} m -> move FRONT-RIGHT"
 
             elif closest_zone == 'BACK':
+                # Añadimos un tick de detección de obstáculo trasero
+                self.ticks_back += 1
+
                 # Reset de ticks
                 self.ticks_front = 0
                 
                 # Pared justo detrás (solo activo si las demás zonas están despejadas):
-                # iniciamos el modo girar derecha
-                twist.linear.x  =  0.0
-                twist.linear.y  =  0.0
-                twist.angular.z =  0.0
+                # Demasiado cerca de la pared trasera
+                if closest_distance < self.base_distance * 0.5:
+                    # Si está muy cerca, damos más prioridad a ir a la izquierda
+                    twist.linear.x  =  self.v_lin * 0.3
+                    twist.linear.y  =  0.0
+                    twist.angular.z =  0.0
+                    action = f"BACK too CLOSE ({closest_distance:.2f} m) -> move FRONT. Ticks = {self.ticks_back}"
 
-                self.rotate_back = True
-
-                action = f"BACK {closest_distance:.2f} m -> ROTATE RIGHT 90°"
+                # Si está muy lejos, se acerca
+                elif closest_distance > self.base_distance * 1.2:
+                    twist.linear.x  =  -self.v_lin * 0.3
+                    twist.linear.y  =  0.0
+                    twist.angular.z =  0.0
+                    action = f"BACK too FAR ({closest_distance:.2f} m) -> move BACK. Ticks = {self.ticks_back}"
+                
+                # Si está a una distancia moderada, movemos hacia la derecha
+                else:
+                    twist.linear.x = 0.0
+                    twist.linear.y = -self.v_lin
+                    twist.angular.z = 0.0
+                    action = (f"BACK {min_right:.2f} m -> move LEFT. Ticks = {self.ticks_back}")
 
             elif closest_zone == 'LEFT':
                 # Reset de ticks
                 self.ticks_front = 0
+                self.ticks_back = 0
                 
                 # Pared justo detrás (solo activo si las demás zonas están despejadas):
                 # iniciamos el modo girar derecha
@@ -357,15 +383,15 @@ class WallFollower(Node):
 
 
         # PRIORIDAD 5: sin pared visible → búsqueda activa
-        # El robot avanza en diagonal hacia la derecha y gira levemente en sentido
-        # horario para barrer el espacio hasta encontrar la pared derecha.
+        # El robot avanza hacia la derecha y gira levemente en sentido
+        # antihorario para barrer el espacio hasta encontrar la pared derecha.
         else:
             # Reset de ticks
             self.ticks_front = 0
             
             twist.linear.x  =  0.0
             twist.linear.y  = -self.v_lin * 0.4
-            twist.angular.z =  0.0
+            twist.angular.z = 0.0
             action = "No wall detected -> search RIGHT wall"
 
         self.cmd = twist
