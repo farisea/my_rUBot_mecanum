@@ -126,15 +126,13 @@ class WallFollower(Node):
         angle_inc = math.degrees(scan.angle_increment)
 
         # Dividimos los 360° en 6 zonas. Referencia: 0° = frente, -90° = derecha, +90° = izquierda.
-        # Usamos 6 zonas en lugar de las típicas 3 porque el movimiento holonómico
-        # nos permite reaccionar de forma diferente según de dónde venga el obstáculo,
-        # sin necesidad de girar el robot entero.
+        # Incluimos la zona izquierda para poder reaccionar a obstáculos que vengan por la izquierda
         min_front       = math.inf
-        min_left        = math.inf   # detecta si hay pared a la izquierda 
-        min_fr_right    = math.inf   # frente-derecha: junto con BACK_RIGHT permite calcular el ángulo con la pared
+        min_left        = math.inf 
+        min_fr_right    = math.inf
         min_right       = math.inf
-        min_back_right  = math.inf   # atrás-derecha: junto con FR_RIGHT permite calcular el ángulo con la pared
-        min_back        = math.inf   # solo se usa si ninguna otra zona tiene obstáculo cercano
+        min_back_right  = math.inf
+        min_back        = math.inf
         
         
         # Ángulos mínimos para las zonas principales
@@ -182,8 +180,7 @@ class WallFollower(Node):
         # La tolerancia evita que el robot corrija constantemente por pequeñas oscilaciones.
         reaction_limit = self.base_distance + self.tol
 
-        # BACK solo tiene en cuenta si ninguna zona prioritaria tiene un obstáculo cercano,
-        # así evitamos que una pared trasera lejana interfiera con la evasión frontal.
+        # BACK solo tiene en cuenta si ninguna zona prioritaria tiene un obstáculo cercano
         zone_min = {
             'FRONT':       min_front,
             'FRONT_RIGHT': min_fr_right,
@@ -197,10 +194,10 @@ class WallFollower(Node):
             zone_min.items(), key=lambda item: item[1]
         )
 
-        # PRIORIDAD 1: giro izquierda si ha pasado mucho tiempo con obstáculo en el frente o ve algo a la izquierda
+        # PRIORIDAD 1: giro izquierda si ha pasado mucho tiempo con obstáculo en el frente
         if self.ticks_front > self.max_front:
             # Si los angular ticks son mayores que 0, significa que ya hemos empezado a girar, así que seguimos girando hasta completar la maniobra
-            # Paramos cuando llegue a 12 ticks angular
+            # Paramos cuando llegue al máximo definido en el init, es decir, cuando haya girado 90 grados
             if self.ticks_angular_z > self.max_z:
                 self.ticks_front = 0
                 self.ticks_angular_z = 0
@@ -215,9 +212,9 @@ class WallFollower(Node):
                 action = f"FRONT time-out ({closest_distance:.2f} m) -> turn LEFT tick={self.ticks_angular_z}"
 
 
-        # PRIORIDAD 2: giro derecha si está detectando BACK
+        # PRIORIDAD 2: giro derecha si hay un obstáculo detrás, para volver seguir la pared
         elif self.rotate_back:
-            # Paramos cuando llegue a los ticks angular
+            # Paramos cuando haya girado 90 grados
             if self.ticks_angular_z > self.max_z:
                 self.rotate_back = False
                 self.ticks_angular_z = 0
@@ -231,9 +228,9 @@ class WallFollower(Node):
                 self.ticks_angular_z += 1
                 action = f"BACK detected ({closest_distance:.2f} m) -> turn RIGHT tick={self.ticks_angular_z}"
         
-        # PRIORIDAD 3: giro 180 grados si está detectando LEFT
-        elif self.rotate_back:
-            # Paramos cuando llegue a los ticks angular * 2
+        # PRIORIDAD 3: giro 180 grados si está detectando un obstáculo a la izquierda, para evitar el choque
+        elif self.rotate_left:
+            # Paramos cuando haya girado 180 grados
             if self.ticks_angular_z > self.max_z * 2:
                 self.rotate_left = False
                 self.ticks_angular_z = 0
@@ -252,7 +249,7 @@ class WallFollower(Node):
 
             # Para cada zona, la reacción se adapta a la dirección del obstáculo:
             if closest_zone == 'FRONT':
-                # Añadimos un tick
+                # Añadimos un tick de detección de obstáculo frontal
                 self.ticks_front += 1
 
                 # Obstáculo solo por delante, izquierda libre:
