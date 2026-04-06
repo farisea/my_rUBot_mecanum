@@ -26,6 +26,8 @@ There are different methods:
 You need first to install the needed packages (already installed in TheConstruct environment and also in our custom SSD environment):
 ```shell
 sudo apt update
+sudo apt install ros-humble-cartographer 
+sudo apt install ros-humble-cartographer-ros
 sudo apt install ros-humble-navigation2 ros-humble-nav2-bringup
 sudo apt install ros-humble-nav2-simple-commander
 sudo apt install ros-humble-tf-transformations
