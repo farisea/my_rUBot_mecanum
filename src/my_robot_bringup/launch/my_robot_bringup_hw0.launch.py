@@ -1,5 +1,4 @@
 import os
-
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
@@ -11,7 +10,7 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     # ================================================================
-    # Global launch arguments
+    # Arguments globals (només els que realment uses)
     # ================================================================
     robot_model = LaunchConfiguration('robot_model')
 
@@ -22,8 +21,6 @@ def generate_launch_description():
     camera_width = LaunchConfiguration('camera_width')
     camera_height = LaunchConfiguration('camera_height')
     usb_video_device = LaunchConfiguration('usb_video_device')
-    camera_pixel_format = LaunchConfiguration('camera_pixel_format')
-    camera_output_encoding = LaunchConfiguration('camera_output_encoding')
 
     declare_robot_model = DeclareLaunchArgument(
         'robot_model',
@@ -32,51 +29,33 @@ def generate_launch_description():
     )
 
     declare_mecanum_serial_port = DeclareLaunchArgument(
-        'mecanum_serial_port',
-        default_value='/dev/ttyACM0',
+        'mecanum_serial_port', default_value='/dev/ttyACM0',
         description='Serial port for Nano mecanum driver'
     )
 
     declare_rplidar_serial_port = DeclareLaunchArgument(
-        'rplidar_serial_port',
-        default_value='/dev/ttyUSB0',
+        'rplidar_serial_port', default_value='/dev/ttyUSB0',
         description='Serial port for RPLidar'
     )
 
     declare_rplidar_frame_id = DeclareLaunchArgument(
-        'rplidar_frame_id',
-        default_value='base_link',
+        'rplidar_frame_id', default_value='base_link',
         description='Frame ID for RPLidar data'
     )
 
     declare_camera_width = DeclareLaunchArgument(
-        'camera_width',
-        default_value='640',
+        'camera_width', default_value='160',
         description='Width of the camera image'
     )
 
     declare_camera_height = DeclareLaunchArgument(
-        'camera_height',
-        default_value='480',
+        'camera_height', default_value='120',
         description='Height of the camera image'
     )
 
     declare_usb_video_device = DeclareLaunchArgument(
-        'usb_video_device',
-        default_value='/dev/video0',
+        'usb_video_device', default_value='/dev/video0',
         description='Video device for USB camera'
-    )
-
-    declare_camera_pixel_format = DeclareLaunchArgument(
-        'camera_pixel_format',
-        default_value='YUYV',
-        description='Pixel format for USB camera'
-    )
-
-    declare_camera_output_encoding = DeclareLaunchArgument(
-        'camera_output_encoding',
-        default_value='rgb8',
-        description='ROS output encoding for USB camera'
     )
 
     # ================================================================
@@ -102,7 +81,7 @@ def generate_launch_description():
     )
 
     # ================================================================
-    # Include hardware sublaunch files
+    # Inclusió dels sub-launchs de hardware
     # ================================================================
     robot_driver_hw_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -122,15 +101,13 @@ def generate_launch_description():
             os.path.join(
                 get_package_share_directory('my_robot_bringup'),
                 'launch',
-                'usb_cam_V4L2_hw.launch.py'
+                'usb_cam_hw.launch.py'
             )
         ),
         launch_arguments={
             'image_width': camera_width,
             'image_height': camera_height,
             'video_device': usb_video_device,
-            'pixel_format': camera_pixel_format,
-            'output_encoding': camera_output_encoding,
         }.items()
     )
 
@@ -149,7 +126,7 @@ def generate_launch_description():
     )
 
     # ================================================================
-    # Build launch description
+    # Construcció LaunchDescription
     # ================================================================
     ld = LaunchDescription()
 
@@ -160,8 +137,6 @@ def generate_launch_description():
     ld.add_action(declare_camera_width)
     ld.add_action(declare_camera_height)
     ld.add_action(declare_usb_video_device)
-    ld.add_action(declare_camera_pixel_format)
-    ld.add_action(declare_camera_output_encoding)
 
     ld.add_action(robot_state_publisher_node)
     ld.add_action(robot_driver_hw_launch)

@@ -42,6 +42,7 @@ sudo apt install -y \
   ros-humble-joint-state-publisher \
   ros-humble-joint-state-publisher-gui \
   ros-humble-usb-cam \
+  ros-humble-v4l2-camera \
   ros-humble-rmw-cyclonedds-cpp \
   ros-humble-nav2-bringup \
   ros-humble-nav2-simple-commander \

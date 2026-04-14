@@ -34,6 +34,14 @@ This script will:
 
 - Add environment setup to .bashrc
 
+**New V4L2 camera package**:
+
+A new package Visual for Linux ROS2 package has to be installed with:
+````bash
+sudo apt install ros-humble-v4l2-camera
+````
+> This is needed for usb cam when using ROS2
+
 # ✅ Verify the installation
 After it finishes (approx. 30–45 minutes):
 

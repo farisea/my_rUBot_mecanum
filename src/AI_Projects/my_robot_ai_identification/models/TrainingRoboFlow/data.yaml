@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 5
+names: ['Forbidden', 'Give', 'Left', 'Right', 'Stop']
+
+roboflow:
+  workspace: trafficsignals-1sjvw
+  project: trafficsignals-detection
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/trafficsignals-1sjvw/trafficsignals-detection/dataset/1
