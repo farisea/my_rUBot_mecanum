@@ -2,10 +2,10 @@ amcl:
   ros__parameters:
     set_initial_pose: true
     initial_pose:
-      x: 0.5
-      y: -1.5
+      x: 0.0
+      y: 0.0
       z: 0.0
-      yaw: 1.57
+      yaw: 0.0
     use_sim_time: True
     alpha1: 0.3   # Soroll rotacional degut a la rotació - augmenta (abans 0.2)
     alpha2: 0.3   # Soroll translacional degut a la rotació - augmenta (abans 0.2)
