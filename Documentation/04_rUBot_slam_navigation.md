@@ -130,6 +130,15 @@ The interesting actions used:
 - /navigate_to_pose
 - /follow_waypoints
 
+Main Class: 
+- BasicNavigator()
+
+Main functions:
+- `.setInitialPose(pose)`
+- `.waitUntilNav2Active()`
+- `.followWaypoints(pose_list)`
+- `.goToPose(pose)`
+
 we need to install (already installed in our SSD custom environment):
 ````shell
 sudo apt install ros-humble-nav2-simple-commander
