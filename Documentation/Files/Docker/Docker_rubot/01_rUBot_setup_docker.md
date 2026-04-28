@@ -149,11 +149,21 @@ We first create a Docker folder where we place:
   ````
 
 Follow the instructions:
-
+- To see the Images and Containers:
+    ```bash
+    docker ps -a               # containers
+    docker images              # images
+    ```
+- To modify the `Dockerfile`, build and push to Docker Hub, you can follow the instructions:
+    ```bash
+    docker build -f Dockerfile_orbbec.robot -t manelpuig/ros2-humble-ub-rubot:orbbec .
+    docker login
+    docker push manelpuig/ros2-humble-ub-rubot:orbbec
+    ```
 - Start the Container
 ````shell
 docker system prune -f
-docker compose -f docker-compose.robot.yaml up -d --build
+docker compose -f docker-compose_orbbec_services.yaml up
 ````
 >First time this will take 25min aprox.
 - If you want to Stop the Container
@@ -245,6 +255,55 @@ If we have a PC in the same network, we only need to:
   docker system prune -f
   docker compose -f docker-compose.robot.yaml up -d --build
   ````
+
+#### **2.1.5. Start Docker container with services on rUBot**
+
+We have translated the 3 services on rUBot in an equivalent `docker-compose_orbbec_services.yaml`
+
+- Open an VScode terminal on `Files/Docker/Docker_rubot`
+- Launch the:
+  ````bash
+  docker system prune -f
+  docker compose -f docker-compose_orbbec_services.yaml up -d
+  ````
+- To proper network communication update `.bashrc` to use these configs
+    - On the PC: 
+
+        ````bash
+        # --- ROS 2 base ---
+        source /opt/ros/humble/setup.bash
+        source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
+        # --- Your workspace ---
+        source /home/student/Desktop/my_rUBot_mecanum/install/setup.bash
+        cd ~/Desktop/my_rUBot_mecanum
+        export QT_QPA_PLATFORM=xcb  # good default for RViz2 on many systems
+        # --- ROS 2 networking ---
+        export ROS_DOMAIN_ID=1 # Group number 1
+        export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+        # Sim mode SUBNET / Lab mode OFF
+        export ROS_AUTOMATIC_DISCOVERY_RANGE=OFF
+        # Sim mode unset / Lab mode robot IP
+        export ROS_STATIC_PEERS=192.168.1.14  # robot IP (14,24,34 or 44)
+        # CycloneDDS XML. Not necessary
+        #export CYCLONEDDS_URI=file:///home/Desktop/my_rUBot_mecanum/network_config/humble/cyclonedds_pc.xml
+        ````
+        > write the proper workspace path, in PC case `/home/student/Desktop/my_rUBot_mecanum`
+    - On the robot:
+
+        ````bash
+        source /opt/ros/humble/setup.bash
+        source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash
+        source /home/ubuntu/my_rUBot_mecanum/install/setup.bash
+        cd /home/ubuntu/my_rUBot_mecanum
+        export ROS_DOMAIN_ID=1
+        export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+        export ROS_AUTOMATIC_DISCOVERY_RANGE=OFF
+        export ROS_STATIC_PEERS=192.168.1.15,192.168.1.16  # PC IP at FacFIS,FacINFORMATICS
+        export CYCLONEDDS_URI=file:///home/ubuntu/my_rUBot_mecanum/network_config/humble/cyclonedds_robot.xml
+        ````
+        > write the proper workspace path, in robot case `/home/ubuntu/my_rUBot_mecanum`
+
+
 
 ### **2.2. Setup the commercial LIMO robot**
 

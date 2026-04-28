@@ -20,9 +20,9 @@ services:
       #- LIBGL_ALWAYS_SOFTWARE=1
       #- MESA_GL_VERSION_OVERRIDE=2.1 
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp # Millor per xarxes wifi amb oscilacions 
-      - CYCLONEDDS_URI=/var/lib/theconstruct.rrl/cyclonedds.xml
+      #- CYCLONEDDS_URI=/var/lib/theconstruct.rrl/cyclonedds.xml
     volumes:
-      - /var/lib/theconstruct.rrl/cyclonedds.xml:/var/lib/theconstruct.rrl/cyclonedds.xml
+      #- /var/lib/theconstruct.rrl/cyclonedds.xml:/var/lib/theconstruct.rrl/cyclonedds.xml
       - /dev:/dev # Això permet l'accés a tots els dispositius /dev del host
       - ./bringup.sh:/bringup.sh
       - ./entrypoint.robot.sh:/entrypoint.robot.sh

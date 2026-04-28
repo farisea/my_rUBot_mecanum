@@ -31,23 +31,12 @@ sudo apt upgrade -y
 # 3. Install Dependencies
 
 ``` bash
+sudo apt update
 sudo apt install -y \
-  git \
-  build-essential \
-  cmake \
-  pkg-config \
-  python3-colcon-common-extensions \
-  python3-rosdep \
-  python3-pip \
-  libusb-1.0-0-dev \
-  libeigen3-dev \
-  libgflags-dev \
-  libgoogle-glog-dev \
-  nlohmann-json3-dev \
-  libdw-dev \
-  libssl-dev \
-  libgl1 \
-  mesa-utils \
+  git build-essential cmake pkg-config \
+  python3-colcon-common-extensions python3-rosdep \
+  libgflags-dev libgoogle-glog-dev nlohmann-json3-dev \
+  libdw-dev libssl-dev libgl1 mesa-utils \
   ros-humble-image-transport \
   ros-humble-image-transport-plugins \
   ros-humble-compressed-image-transport \
@@ -57,10 +46,8 @@ sudo apt install -y \
   ros-humble-diagnostic-msgs \
   ros-humble-statistics-msgs \
   ros-humble-xacro \
-  ros-humble-backward-ros \
-  ros-humble-cv-bridge
-```
-
+  ros-humble-backward-ros
+````
 ------------------------------------------------------------------------
 
 # 4. Initialize rosdep
@@ -106,7 +93,7 @@ rosdep install --from-paths src --ignore-src -r -y
 
 ``` bash
 cd ~/orbbec_ws
-colcon build --symlink-install --parallel-workers 2
+colcon build --event-handlers console_direct+ --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
 
 ------------------------------------------------------------------------

@@ -41,7 +41,7 @@ ros2 launch realsense2_camera rs_launch.py \
   depth_module.depth_profile:=640x360x15 \
   pointcloud.enable:=false
 ```
-When camera is on **raspberrypi**, the installation instructions are equivalent, but you have to:
+When camera is on **raspberrypi** (not recommended!), the installation instructions are equivalent, but you have to:
 - add a patch to it kernel (after step `cd librealsense`):
   ````bash
   cd ~/software/librealsense
@@ -74,6 +74,15 @@ When camera is on **raspberrypi**, the installation instructions are equivalent,
     rgb_camera.color_profile:=640x480x30 \
     enable_infra1:=false enable_infra2:=false
   ```
+
+## PC Ubuntu 24 with Docker
+
+We have created a Docker image: 
+- manelpuig/ros2-humble-ub-ur5e:realsense
+- Documented on `https://github.com/manelpuig/UR5e_social_robotics`
+
+Important to add on `.bashrc` an environment variable:
+- export LD_PRELOAD=/usr/local/lib/librealsense2.so
 
 # Install Orbbec DaBai
 
@@ -295,6 +304,14 @@ Then you can use it with:
 source /opt/ros/humble/setup.bash
 ros2 run orbbec_camera list_devices_node
 ros2 launch orbbec_camera gemini2.launch.py
+````
+
+**Possible trouble**:
+- uvcvideo problem:
+````bash
+echo "blacklist uvcvideo" | sudo tee /etc/modprobe.d/blacklist-uvcvideo.conf
+sudo update-initramfs -u
+sudo reboot
 ````
 
 ## If you have a PC-Ubuntu24
