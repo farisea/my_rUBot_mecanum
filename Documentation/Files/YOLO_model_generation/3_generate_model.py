@@ -10,7 +10,7 @@ def main():
     print("Starting training...")
 
     model.train(
-        data="traffic_sign_dataset",   # Folder with train/val class subfolders
+        data="traffic_sign_dataset_clase",   # Folder with train/val class subfolders
         epochs=50,                     # Maximum number of training epochs
         imgsz=640,                     # Input image size used during training
         batch=8,                       # Number of images processed per training step
@@ -44,7 +44,7 @@ def main():
 
         workers=0,                     # Safer on Windows; use 2 or 4 on Linux
         project="runs/classify",       # Output folder
-        name="train",                  # Experiment name
+        name="train_clase",                  # Experiment name
         exist_ok=True,                 # Overwrite/reuse folder if it already exists
 
         plots=True,                    # Save training plots
