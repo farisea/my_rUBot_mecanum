@@ -43,7 +43,7 @@ def main():
         seed=42,                       # Makes training more reproducible
 
         workers=0,                     # Safer on Windows; use 2 or 4 on Linux
-        project="runs/classify",       # Output folder
+        project="runs_clase/classify",       # Output folder
         name="train_clase",                  # Experiment name
         exist_ok=True,                 # Overwrite/reuse folder if it already exists
 
