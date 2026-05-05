@@ -79,8 +79,8 @@ class YoloClassificationNode(Node):
         # DRAW TEXT CENTERED AT TOP
         # ------------------------------
         font = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = 1.0
-        thickness = 2
+        font_scale = 0.3
+        thickness = 1
 
         text_size, _ = cv2.getTextSize(text, font, font_scale, thickness)
         text_width, text_height = text_size
