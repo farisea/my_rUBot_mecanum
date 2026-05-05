@@ -12,10 +12,10 @@ MODEL_PATH = "models/yolov8n_custom.pt"
 CAMERA_INDEX = 0
 WINDOW_NAME = "YOLO Traffic Sign Detection"
 
-CONF_THRESHOLD = 0.50
-IMG_SIZE = 160 # Size of images used for training the yolo model
+CONF_THRESHOLD = 0.60
+IMG_SIZE = 640 # Size of images used for training the yolo model
 
-DISPLAY_SCALE = 2   # Only affects visualization size
+DISPLAY_SCALE = 5   # Only affects visualization size
 
 # ==============================
 # CHECK MODEL
@@ -30,6 +30,7 @@ if not os.path.exists(MODEL_PATH):
 model = YOLO(MODEL_PATH)
 
 print("Model loaded correctly")
+print("Model task:", model.task)
 print("Model classes:")
 print(model.names)
 

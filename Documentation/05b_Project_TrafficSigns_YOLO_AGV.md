@@ -205,6 +205,16 @@ In `real robot`:
 ros2 launch my_robot_ai_identification rubot_nav2_detection_targets.launch.py use_sim_time:=false map_file:=map_project.yaml params_file:=rubot_real_lidar.yaml yolo_params:=yolo_signals.yaml nav_params:=yolo_targets.yaml nav_start_delay:=2.0
 ````
 
+You can launch all nodes with only one launch file:
+````bash
+ros2 launch my_robot_ai_identification ai_navigation.launch.py \
+  map_file:=my_map2.yaml \
+  params_file:=rubot_real_lidar.yaml \
+  yolo_params:=yolo_params_real.yaml \
+  nav_params:=yolo_targets_real.yaml \
+  signs_file:=sign_positions_real.yaml
+````
+
 | AI Identification and Navigation video | Code execution video |
 |----------|------------|
 | [▶️ rUBot Traffic signal Detection & Autonomous Navigation](./Images/07_Yolo/Yolo_left.mp4) | [▶️ rUBot code execution](./Images/07_Yolo/YoloSignalWaypoint.webm) |

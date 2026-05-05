@@ -45,7 +45,7 @@ def generate_launch_description():
         respawn_delay=2.0,
         parameters=[{
             'video_device': video_device,
-            'image_size': [image_width, image_height],
+            'image_size': [160, 120], #[image_width, image_height],
             'pixel_format': pixel_format,
             'output_encoding': output_encoding,
         }]

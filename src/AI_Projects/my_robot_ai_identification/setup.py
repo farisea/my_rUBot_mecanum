@@ -26,11 +26,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'limo_rt_prediction_yolo_exec = my_robot_ai_identification.limo_rt_prediction_yolo:main',
+            'rubot_rt_prediction_yolo_exec = my_robot_ai_identification.rubot_rt_prediction_yolo:main',
             'rubot_detection_yolo_exec = my_robot_ai_identification.rubot_detection_yolo:main',
             'rubot_targets_yolo_exec = my_robot_ai_identification.rubot_targets_yolo:main',
-            'yolo_prediction_rgb_sw_exec = my_robot_ai_identification.yolo_prediction_rgb_sw:main',
-            'yolo_prediction_rgb_depth_compressed_sw_exec = my_robot_ai_identification.yolo_prediction_rgb_depth_compressed_sw:main',
         ],
     },
 )
