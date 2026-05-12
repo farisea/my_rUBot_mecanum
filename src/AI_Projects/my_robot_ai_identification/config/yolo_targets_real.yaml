@@ -4,9 +4,9 @@ custom_nav2:
 
     initial_pose: [0.0, 0.0, 0.0]
 
-    signal_waypoint: [0.5, 0.3, 0.0]
+    signal_waypoint: [0.3, 0.0, 0.0]
 
-    target_pose: [2.0, 0.5, 1.57]
+    target_pose: [2.0, -0.5, 1.57]
 
     reading_stop_time: 1.5
 
