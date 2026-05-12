@@ -10,8 +10,8 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
 
-    wp_name_arg = DeclareLaunchArgument(
-        'wp_name',
+    wp_file_arg = DeclareLaunchArgument(
+        'wp_file',
         default_value='waypoints_sw.yaml',
         description='Waypoint YAML filename inside package config folder'
     )
@@ -19,7 +19,7 @@ def generate_launch_description():
     wp_file = PathJoinSubstitution([
         FindPackageShare('my_robot_nav_control'),
         'config',
-        LaunchConfiguration('wp_name')
+        LaunchConfiguration('wp_file')
     ])
 
     nav_waypoints_node = Node(
@@ -33,6 +33,6 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        wp_name_arg,
+        wp_file_arg,
         nav_waypoints_node
     ])

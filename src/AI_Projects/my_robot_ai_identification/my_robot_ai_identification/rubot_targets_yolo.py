@@ -158,10 +158,7 @@ class NavigationTask(Node):
 
         self.go_to_pose(signal_pose, "signal waypoint")
 
-        self.wait_seconds(
-            self.reading_stop_time,
-            "Reading traffic sign"
-        )
+        self.traffic_waypoint = None
 
         traffic_pose = self.wait_for_traffic_waypoint(
             self.wait_for_traffic_wp

@@ -10,13 +10,13 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     pkg_path = get_package_share_directory('my_robot_ai_identification')
-    nav_params = os.path.join(pkg_path, 'config', 'yolo_targets.yaml')
+    nav_params = os.path.join(pkg_path, 'config', 'yolo_targets_real.yaml')
 
     use_sim_time = LaunchConfiguration('use_sim_time')
 
     declare_use_sim_time = DeclareLaunchArgument(
         'use_sim_time',
-        default_value='true',
+        default_value='false',
         description='Use simulation clock if true'
     )
 

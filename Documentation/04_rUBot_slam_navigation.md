@@ -166,7 +166,7 @@ To navigate programmatically using Simple Commander API, you have to proceed wit
 
 - Launch the created python file to define the Initial point and some targets waypoints defined in config folder:
     ````
-    ros2 launch my_robot_nav_control nav_waypoints.launch.py wp_name:=waypoints_sw.yaml
+    ros2 launch my_robot_nav_control nav_waypoints.launch.py wp_file:=waypoints_sw.yaml
     ````
 - The params are described in `waypoints_sw.yaml` file in config folder:
     ````yaml

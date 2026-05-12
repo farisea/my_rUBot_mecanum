@@ -60,7 +60,7 @@ def generate_launch_description():
 
     declare_delay = DeclareLaunchArgument(
         'nav_start_delay',
-        default_value='5.0',
+        default_value='2.0',
         description='Seconds to wait before starting navigation node'
     )
 
@@ -79,7 +79,7 @@ def generate_launch_description():
 
     declare_params_file = DeclareLaunchArgument(
         'params_file',
-        default_value='rubot_real_lidar.yaml',
+        default_value='rubot_sw.yaml',
         description='Nav2 params filename inside my_robot_navigation2/param/'
     )
 
@@ -126,7 +126,7 @@ def generate_launch_description():
         # --------------------------------------------------
         yolo_node = Node(
             package='my_robot_ai_identification',
-            executable='rubot_identification_yolo_cls_exec',
+            executable='rubot_detection_yolo_cls_exec',
             name='object_detection',
             output='screen',
             parameters=[
