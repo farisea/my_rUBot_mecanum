@@ -12,7 +12,7 @@ from cv_bridge import CvBridge
 # ==============================
 # PARAMETERS
 # ==============================
-MODEL_PATH = "runs/classify/train/weights/best.pt"
+MODEL_PATH = "runs/classify/runs_clase/classify/train_clase/weights/best.pt"
 IMAGE_TOPIC = "/image_raw"
 IMG_SIZE = 640
 CONF_THRESHOLD = 0.25
