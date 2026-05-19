@@ -56,7 +56,7 @@ sudo apt install -y \
   ros-humble-rosbridge-server
 
 echo "=== 5. Python packages ==="
-pip3 install -U ultralytics "numpy<1.24" pyserial
+#pip3 install -U ultralytics "numpy<1.24" pyserial
 
 echo "=== 6. Initialize rosdep ==="
 sudo rosdep init || echo "rosdep already initialized"

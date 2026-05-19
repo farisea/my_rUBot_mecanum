@@ -1,15 +1,13 @@
 custom_nav2:
   ros__parameters:
+    use_sim_time: true
 
-    # Initial pose [x, y, yaw] in "map" frame
     initial_pose: [0.5, -1.5, 1.57]
 
-    # Final target pose [x, y, yaw] in "map" frame
-    target_pose: [-1.0, 1.0, 1.57]
+    signal_waypoint: [0.5, -1.1, 1.75]
 
-    # Default intermediate waypoint [x, y, yaw]
-    # (will be overridden if /traffic_waypoint is received)
-    waypoint: [0.5, -1.0, 1.57]
+    target_pose: [0.4, 1.2, 1.57]
 
-    # Time (seconds) to wait for /traffic_waypoint
-    wait_for_traffic_wp: 1.0
+    reading_signal_time: 4.0
+
+    wait_for_traffic_wp: 10.0

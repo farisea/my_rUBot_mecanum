@@ -1,0 +1,7 @@
+object_detection:
+  ros__parameters:
+    use_sim_time: true
+    modelYolo: yolo11n_cls_g1.pt
+    topic: /camera/image_raw
+    confidence: 0.70
+    signal_waypoint: [0.5, -1.1, 1.75]

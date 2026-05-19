@@ -167,35 +167,26 @@ ros2 launch orbbec_camera gemini2.launch.py \
   connection_delay:=3000
 ```
 
-------------------------------------------------------------------------
+Recommended configuration for a Orbbec_Gemini2L on Raspberrypi4 is:
+````bash
+ros2 launch orbbec_camera gemini2L.launch.py \
+  color_width:=640 \
+  color_height:=400 \
+  color_fps:=15 \
+  color_format:=MJPG \
+  depth_width:=640 \
+  depth_height:=400 \
+  depth_fps:=15 \
+  depth_format:=Y14 \
+  depth_registration:=false \
+  enable_ir:=false \
+  enable_point_cloud:=false \
+  enable_accel:=false \
+  enable_gyro:=false \
+  connection_delay:=3000
+````
 
-# 13. Enable Compressed Image Transport
-
-Install plugins (if not already installed):
-
-``` bash
-sudo apt install ros-humble-compressed-image-transport
-```
-
-View compressed stream:
-
-``` bash
-ros2 run rqt_image_view rqt_image_view
-```
-
-Select:
-
-    /camera/color/image_raw/compressed
-
-Or publish compressed explicitly:
-
-``` bash
-ros2 run image_transport republish raw in:=/camera/color/image_raw compressed out:=/camera/color/image_compressed
-```
-
-------------------------------------------------------------------------
-
-# 14. Verify Topics
+# 13. Verify Topics
 
 ``` bash
 ros2 topic list
@@ -212,18 +203,13 @@ Check frame rate:
 ``` bash
 ros2 topic hz /camera/color/image_raw
 ```
+View compressed stream:
 
-------------------------------------------------------------------------
+``` bash
+ros2 run rqt_image_view rqt_image_view
+```
 
-# 15. Recommended Performance Settings (Raspberry Pi 4)
+Select:
 
-Use:
+    /camera/color/image_raw/compressed
 
--   640×480 color
--   640×400 depth
--   15 FPS
--   Disable IMU
--   Disable IR
--   Disable point cloud
-
-This ensures stable operation on ARM systems.
