@@ -1,6 +1,6 @@
 sign_positions:
   Left: [0.7, 0.0]
-  #Right: [0.7, 0.0]
-  #Stop: [2.30, -1.00]
-  #Give: [5.00, 0.20]
-  #Forbidden: [9.00, 0.00]
+  Right: [0.7, 0.0]
+  #STOP: [0.7, 0.0]
+  #Give: [0.7, 0.0]
+  #Forbidden: [0.7, 0.0]

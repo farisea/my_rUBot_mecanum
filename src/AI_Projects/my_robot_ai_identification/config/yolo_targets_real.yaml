@@ -8,6 +8,6 @@ custom_nav2:
 
     target_pose: [2.0, -0.5, 1.57]
 
-    reading_stop_time: 1.5
+    reading_signal_time: 1.0
 
-    wait_for_traffic_wp: 5.0
+    wait_for_traffic_wp: 10.0

@@ -52,7 +52,7 @@ class YoloObjectDetection(Node):
         # Waypoint offsets
         # --------------------------------------------------
         self.wp_forward_m = 0.5
-        self.wp_lateral_m = 0.7
+        self.wp_lateral_m = 0.6
 
         # --------------------------------------------------
         # State
@@ -163,6 +163,23 @@ class YoloObjectDetection(Node):
         )
 
         return pose
+
+    # --------------------------------------------------
+    # Wait seconds
+    # --------------------------------------------------
+    def wait_seconds(self, duration_s, label):
+
+        self.get_logger().info(f"{label} for {duration_s:.1f} s")
+
+        start = self.get_clock().now().nanoseconds / 1e9
+
+        while rclpy.ok():
+            now = self.get_clock().now().nanoseconds / 1e9
+
+            if now - start >= duration_s:
+                break
+
+            rclpy.spin_once(self, timeout_sec=0.1)
 
     # --------------------------------------------------
     # Camera callback
@@ -293,6 +310,12 @@ class YoloObjectDetection(Node):
             if waypoint is None:
                 self.get_logger().warn(f"No waypoint created for sign: {sign_name}")
                 return
+
+            # Wait for 3 seconds before publishing the waypoint to allow the robot to react to the sign.
+            self.get_logger().info(
+                "Waiting for 3 seconds before publishing waypoint..."
+            )
+            self.wait_seconds(6.0, "Reacting to sign")
 
             self.waypoint_pub.publish(waypoint)
 

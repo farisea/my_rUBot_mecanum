@@ -6,4 +6,4 @@ object_detection:
     modelYolo: best_clase.pt
     topic: /image_raw
     confidence: 0.40
-    front_distance: 1.0
+    signal_waypoint: [0.3, 0.0, 0.0]
