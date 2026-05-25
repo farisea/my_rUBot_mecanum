@@ -72,6 +72,11 @@ sudo apt install imagemagick
 display mapa_proyecto_final.pgm
 ```
 
+- Para que luego se pueda usar el mapa:
+```
+colcon build
+```
+
 ---
 
 ## Navigation
