@@ -1,5 +1,16 @@
 # Comandos del Proyecto de Robótica
 
+
+## Inicio
+
+```
+rm -rf install log
+```
+```
+colcon build
+```
+
+
 ---
 
 ## Self-control
